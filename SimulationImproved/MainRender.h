@@ -8,7 +8,7 @@
 #include "GameObjects.h"
 #include "VerticeShapes.h"
 #include "Camera.h"
-#include "Lighting.h"
+
 #include <Keyboard.h>
 #include "imgui\\imgui.h"
 #include "imgui\\imgui_impl_dx11.h"
@@ -26,8 +26,7 @@ struct ConstantBuffer
 	XMFLOAT4X4 mWorldInverse;
 	XMFLOAT4X4 mView;
 	XMFLOAT4X4 mProjection;
-	XMFLOAT4 vLightPos[4];
-	XMFLOAT4 vLightColour[4];
+
 	XMFLOAT4 vCameraPos;
 	float numOfLights;
 	float time;
@@ -68,10 +67,10 @@ private:
 	ID3D11SamplerState*									mSampler = nullptr;
 	ConstantBuffer										cb1;
 
-	void SetLights(const Lighting& light);
+
 	void SetCamera(const Camera* camera);
 	HRESULT VertexIndex(const VerticeShapes& shape);
-	HRESULT Texture(const VerticeShapes& shape);
+	
 	HRESULT Shader(const VerticeShapes& shape);
 	HRESULT InitWindow(HINSTANCE hInstance, int nCmdShow);
 	LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
@@ -82,9 +81,7 @@ private:
 	vector<Camera> cameras;
 	vector<GameObject> entities;
 	float timescale;
-	float timeSinceExplosion;
-	const float collisionRadius = 0.3f;
-	const float explosionRadius = 1.f;
+	
 	int width;
 	int height;
 	bool isExit;
@@ -95,24 +92,18 @@ private:
 	unique_ptr<Keyboard> keyboard{};
 
 	Camera* activeCam;
-	Camera* rocketCam;
-	Camera* rocketNoseCam;
-	Camera* rocketBodyCam;
+	
 
-	GameObject* rocket;
+	
 	GameObject* terrain;
-	GameObject* sun;
-	GameObject* moon;
-	GameObject* explosion;
-	GameObject* launcher;
-	GameObject* smoke;
+	
 
 	void CheckInput(const float& dt);
 	void CreateCameras();
-	void CreateTerrain();
+	void CreateVoxels();
 	
 	
-	void SpawnExplosion(const XMFLOAT3& position);
+	
 	void SetEntityPointers();
 	
 
@@ -132,6 +123,8 @@ public:
 
 	MainRender& operator=(const MainRender&) = delete;
 	MainRender(const MainRender&) = delete;
+
+	
 
 	void setReset(bool _st) 
 	{

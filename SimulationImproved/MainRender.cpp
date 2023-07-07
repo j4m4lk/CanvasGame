@@ -319,7 +319,7 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 {
 	HRESULT hr = static_cast<HRESULT>(0L);
 
-	cb1.numOfLights = 0;
+	
 	cb1.time = time;
 
 	// Clear the back buffer
@@ -332,11 +332,7 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 	
 	for (const auto& entity : entities)
 	{
-		for (const auto& light : entity.Lights())
-		{
 		
-			SetLights(light);
-		}
 	}
 	
 	for (const auto& entity : entities)
@@ -350,11 +346,8 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 				return hr;
 			}
 			
-			hr = Texture(shape);
-			if (FAILED(hr))
-			{
-				return hr;
-			}
+			
+			
 			
 			hr = VertexIndex(shape);
 			if (FAILED(hr))
@@ -367,24 +360,7 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 			mImmediateContext->UpdateSubresource(mConstantBuffer, 0, nullptr, &cb1, 0, 0);
 
 		
-			if (shape.ParticleSystem())
-			{
-				
-				float blendFactor[] = { 0.5f, 0.0f, 0.0f, 0.0f };
-				mImmediateContext->OMSetBlendState(mBlendStateAlpha, blendFactor, 0xffffffff);
-				
-				mImmediateContext->OMSetDepthStencilState(mDepthStencilLessThanEqual, 0);
-				
-				mImmediateContext->RSSetState(mRasteriserStateNoCull);
-			}
-			else
-			{				
-				mImmediateContext->OMSetBlendState(mBlendStateDisable, nullptr, 0xffffffff);
-				
-				mImmediateContext->OMSetDepthStencilState(NULL, 0);
-				
-				mImmediateContext->RSSetState(mRasteriserStateBackCull);
-			}
+			
 
 			
 			if (shape.Instances().size() > 0)
@@ -440,12 +416,7 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 }
 
 
-void MainRender::SetLights(const Lighting& light)
-{
-	cb1.vLightPos[static_cast<int>(cb1.numOfLights)] = light.Position();
-	cb1.vLightColour[static_cast<int>(cb1.numOfLights)] = light.Colour();
-	cb1.numOfLights = cb1.numOfLights + 1;
-}
+
 
 
 void MainRender::SetCamera(const Camera* const camera)
@@ -464,7 +435,8 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 		ZeroMemory(&mBufferDesc, sizeof(mBufferDesc));
 		mBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 		mBufferDesc.ByteWidth = sizeof(SimpleVertex) * shape.Vertices().size();
-		mBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		mBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
+
 		mBufferDesc.CPUAccessFlags = 0;
 		D3D11_SUBRESOURCE_DATA InitData;
 		ZeroMemory(&InitData, sizeof(InitData));
@@ -551,73 +523,7 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 	return hr;
 }
 
-HRESULT MainRender::Texture(const VerticeShapes& shape)
-{
-	HRESULT hr = static_cast<HRESULT>(0L);
-	ID3D11ShaderResourceView* textureRV = nullptr;
 
-
-	if (!shape.DiffuseTexture().empty())
-	{	
-		if (mTextures.count(shape.DiffuseTexture()) == 0)
-		{
-			
-			hr = CreateDDSTextureFromFile(mD3dDevice, shape.DiffuseTexture().c_str(), nullptr, &textureRV);
-			if (FAILED(hr))
-				return hr;
-		
-			mTextures.insert(pair<wstring, ID3D11ShaderResourceView*>(shape.DiffuseTexture(), textureRV));		
-			mImmediateContext->PSSetShaderResources(0, 1, &textureRV);
-		}
-		else
-		{			
-			mImmediateContext->PSSetShaderResources(0, 1, &mTextures[shape.DiffuseTexture()]);
-		}
-	}
-
-	
-	if (!shape.NormalMap().empty())
-	{
-		
-		if (mTextures.count(shape.NormalMap()) == 0)
-		{
-			
-			hr = CreateDDSTextureFromFile(mD3dDevice, shape.NormalMap().c_str(), nullptr, &textureRV);
-			if (FAILED(hr))
-				return hr;
-		
-			mTextures.insert(pair<wstring, ID3D11ShaderResourceView*>(shape.NormalMap(), textureRV));
-
-		
-			mImmediateContext->PSSetShaderResources(1, 1, &textureRV);
-		}
-		else
-		{			
-			mImmediateContext->PSSetShaderResources(1, 1, &mTextures[shape.NormalMap()]);
-		}
-	}
-
-	
-	if (!shape.DisplacementMap().empty())
-	{		
-		if (mTextures.count(shape.DisplacementMap()) == 0)
-		{
-			hr = CreateDDSTextureFromFile(mD3dDevice, shape.DisplacementMap().c_str(), nullptr, &textureRV);
-			if (FAILED(hr))
-				return hr;		
-			mTextures.insert(pair<wstring, ID3D11ShaderResourceView*>(shape.DisplacementMap(), textureRV));			
-			mImmediateContext->PSSetShaderResources(2, 1, &textureRV);
-		}
-		else
-		{		
-			mImmediateContext->PSSetShaderResources(2, 1, &mTextures[shape.DisplacementMap()]);
-		}
-	}
-
-
-
-	return static_cast<HRESULT>(0L);
-}
 // Initializes windows and its parameters
 HRESULT InitWindow(const HINSTANCE hInstance, const int nCmdShow)
 {
@@ -683,6 +589,7 @@ HRESULT MainRender::Shader(const VerticeShapes& shape)
 		{			
 			D3D11_INPUT_ELEMENT_DESC layout[] =
 			{
+				 { "INSTANCEID", 0, DXGI_FORMAT_R32_SINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -986,15 +893,11 @@ void MainRender::CheckInput(const float& dt)
 	}
 	if (kb.OemPeriod && kb.LeftShift && !isRocketLaunched)
 	{
-		rocket->RotateEntity(XMFLOAT3(0, 0, XMConvertToRadians(-5)), timescale, dt);
-		launcher->RotateEntity(XMFLOAT3(0, 0, XMConvertToRadians(-5)), timescale, dt);
-		rocketNoseCam->SetLookAt(rocket->Shapes()[1].WorldPos());
+		
 	}
 	if (kb.OemComma && kb.LeftShift && !isRocketLaunched)
 	{
-		rocket->RotateEntity(XMFLOAT3(0, 0, XMConvertToRadians(5)), timescale, dt);
-		launcher->RotateEntity(XMFLOAT3(0, 0, XMConvertToRadians(5)), timescale, dt);
-		rocketNoseCam->SetLookAt(rocket->Shapes()[1].WorldPos());
+		
 	}
 	if (kb.F11)
 	{
@@ -1024,7 +927,7 @@ void MainRender::CreateCameras()
 	const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
 	//camera 1 Position
-	Camera newCamera(true, XMFLOAT3(-2, 8, 0), XMFLOAT3(0, 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
+	Camera newCamera(true, XMFLOAT3(0.5f, 9.0f, 0), XMFLOAT3(XMConvertToRadians(90), 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
 	cameras.push_back(newCamera);
 
 	//camera 2 Position
@@ -1045,48 +948,56 @@ void MainRender::CreateCameras()
 
 	//Assign the camera pointers to cameras;
 	activeCam = &cameras[0];
-	rocketCam = &cameras[2];
-	rocketNoseCam = &cameras[3];
-	rocketBodyCam = &cameras[4];
+	
+}
+
+// to assing ids and color for the cubes 
+XMFLOAT3 assignColorBasedOnId(int id) {
+	// For simplicity, alternate between red, green, and blue
+	switch (id % 3)
+	{
+	case 0: return XMFLOAT3(1.0f, 0.0f, 0.0f);  // Red
+	case 1: return XMFLOAT3(0.0f, 1.0f, 0.0f);  // Green
+	case 2: return XMFLOAT3(0.0f, 0.0f, 1.0f);  // Blue
+	default: return XMFLOAT3(1.0f, 1.0f, 1.0f);  // White (should not reach here)
+	}
 }
 
 
-
-
-void MainRender::CreateTerrain()
+void MainRender::CreateVoxels()
 {
 
 	vector<InstanceData> instances;
-	vector<XMFLOAT3> cubeColors;
+
+	int id = 0;  // Initialize cube ID counter
 
 	for (int y = 0; y < 2; y++)
 	{
 		for (int z = 0; z < 10; z++)
 		{
-			for (int x = 0; x <10; x++)
+			for (int x = 0; x < 10; x++)
 			{
-				instances.emplace_back(InstanceData{ XMFLOAT3(x * -2, y * 2, z * 2) });
-				// Set color for each cube
-				cubeColors.push_back(XMFLOAT3(1.0f, 0.0f, 0.0f));
-				
+				InstanceData instance = { XMFLOAT3(x * -2, y * 2, z * 2), assignColorBasedOnId(id) };
+				instances.push_back(instance);
+				id++;
+
 			}
 		}
 	}
-
-	int cubeIndex = 33;
-	cubeColors[cubeIndex] = XMFLOAT3(0.0f, 1.0f, 0.0f); // Set color to green
-
+	
+	
 
 
 	vector<InstanceData>* const instancesPointer = &instances;
 
 
 
-	GameObject terrainObject(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(0.1f, 0.1f, 0.1f), "Terrain", 0.0f, 0.0f);
-	terrainObject.AddShape(MeshType::CUBE, XMFLOAT3(0, 50, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "TerrainCube", &instances, false);
-	entities.push_back(terrainObject);
-	terrain = &terrainObject;
+	GameObject Voxels(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(0.1f, 0.1f, 0.1f), "Voxels", 0.0f, 0.0f);
+	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(0, 50, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances, false);
+	entities.push_back(Voxels);
+	terrain = &Voxels;
 }
+
 
 
 
@@ -1102,30 +1013,7 @@ void MainRender::SetEntityPointers()
 		{
 			terrain = &entity;
 		}
-		if (entity.Name() == "Rocket")
-		{
-			rocket = &entity;
-		}
-		if (entity.Name() == "Sun")
-		{
-			sun = &entity;
-		}
-		if (entity.Name() == "Moon")
-		{
-			moon = &entity;
-		}
-		if (entity.Name() == "Explosion")
-		{
-			explosion = &entity;
-		}
-		if (entity.Name() == "Launcher")
-		{
-			launcher = &entity;
-		}
-		if (entity.Name() == "Smoke")
-		{
-			smoke = &entity;
-		}
+	
 	}
 }
 
@@ -1165,7 +1053,7 @@ void MainRender::InitScene()
 
 	// Function calls for Drawing 
 	CreateCameras();
-	CreateTerrain();
+	CreateVoxels();
 	
 	SetEntityPointers();
 
@@ -1176,8 +1064,7 @@ void MainRender::InitScene()
 void MainRender::ResetScene()
 {
 	isReset = true;
-	isRocketLaunched = false;
-	isEngineOn = false;
+	
 	timescale = 1;
 	InitScene();
 }

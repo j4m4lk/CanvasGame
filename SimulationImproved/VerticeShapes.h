@@ -11,11 +11,8 @@ using namespace std;
 
 enum class MeshType
 {
-	CUBE,
-	SPHERE,
-	CYLINDER,
-	CONE,
-	QUAD
+	CUBE
+	
 };
 
 
@@ -34,6 +31,8 @@ struct InstanceData
 	XMFLOAT3 Pos;
 	
 	XMFLOAT3 color;
+	XMFLOAT3 instanceColor;
+	int id;
 
 	bool operator==(const InstanceData& a) const
 	{
@@ -51,10 +50,7 @@ private:
 	XMFLOAT3 translation;
 	XMFLOAT3 rotation;
 	XMFLOAT3 scale;
-	XMFLOAT3 wolrdPos;
-	wstring diffuseTexture;
-	wstring normalMap;
-	wstring displacementMap;
+	XMFLOAT3 wolrdPos;	
 	wstring shader;
 	string name;
 	MeshType geometryType;
@@ -62,10 +58,7 @@ private:
 	bool particlesSystem;
 
 	void Cube();
-	void Sphere() const;
-	void Cylinder();
-	void Cone();
-	void Quad();
+	
 
 public:
 	VerticeShapes();
@@ -76,16 +69,13 @@ public:
 
 	const vector<SimpleVertex>& Vertices() const;
 	const vector<WORD>& Indices() const;
-	const vector<InstanceData>& Instances() const;
-	const wstring& DiffuseTexture() const;
-	const wstring& NormalMap() const;
-	const wstring& DisplacementMap() const;
+	const vector<InstanceData>& Instances() const;	
 	const wstring& Shader() const;
 	const XMFLOAT3& WorldPos() const;
 	const XMFLOAT4X4& Transform() const;
 	const MeshType& Geometry() const;
 	const string& Name() const;
-	const bool& ParticleSystem() const;
+	
 
 	void SetTransform(const XMFLOAT4X4& entityTransform);
 	void RemoveInstances(const vector<InstanceData>& instancesToRemove);

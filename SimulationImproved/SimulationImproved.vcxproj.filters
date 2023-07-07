@@ -40,13 +40,7 @@
     <ClCompile Include="Camera.cpp">
       <Filter>SourceFiles</Filter>
     </ClCompile>
-    <ClCompile Include="D3DFramework.cpp">
-      <Filter>SourceFiles</Filter>
-    </ClCompile>
     <ClCompile Include="VerticeShapes.cpp">
-      <Filter>SourceFiles</Filter>
-    </ClCompile>
-    <ClCompile Include="Lighting.cpp">
       <Filter>SourceFiles</Filter>
     </ClCompile>
     <ClCompile Include="GameObjects.cpp">
@@ -57,15 +51,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="EffectShader.fx">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="InstancedShader.fx">
       <Filter>Shaders</Filter>
     </FxCompile>
@@ -73,51 +58,6 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Instanced_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="BumpShader.fx">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Bump_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Bump_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ReflectiveShiny.fx">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ReflectiveShiny_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ReflectiveShiny_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="EngineParticle.fx">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="EngineParticle_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="EngineParticle_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ExplosionParticle.fx">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ExplosionParticle_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="ExplosionParticle_PS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="SmokeParticle.fx">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="SmokeParticle_VS.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="SmokeParticle_PS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
@@ -132,12 +72,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VerticeShapes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Lighting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DFramework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imconfig.h">

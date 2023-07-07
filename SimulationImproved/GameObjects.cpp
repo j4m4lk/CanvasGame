@@ -47,21 +47,12 @@ void GameObject::AddShape(const MeshType& geometryType, const XMFLOAT3& translat
 	
 	
 	
-	case MeshType::QUAD:
-	{
-		const VerticeShapes Shape(MeshType::QUAD,  transform, translation, rotation, scale,  shader, name, instanceData, particleSystem);
-		shapes.push_back(Shape);
-		break;
-	}
+	
 	}
 }
 
 
-void GameObject::AddLight(const XMFLOAT4& translation, const XMFLOAT4& colour, const string& name)
-{
-	const Lighting Light(transform, translation, colour, name);
-	lights.push_back(Light);
-}
+
 
 
 const vector<VerticeShapes>& GameObject::Shapes() const
@@ -69,10 +60,7 @@ const vector<VerticeShapes>& GameObject::Shapes() const
 	return shapes;
 }
 
-const vector<Lighting>& GameObject::Lights() const
-{
-	return lights;
-}
+
 
 const XMFLOAT3& GameObject::Up() const
 {
@@ -121,10 +109,7 @@ void GameObject::UpdateChildren()
 		shape.SetTransform(transform);
 	}
 
-	for (auto& light : lights)
-	{
-		light.SetTransform(transform);
-	}
+	
 }
 
 void GameObject::SetTransform()
@@ -227,16 +212,7 @@ void GameObject::RemoveInstancesFromShape(const string& name, const vector<Insta
 	}
 }
 
-void GameObject::ChangeLightColour(const string& name, const XMFLOAT4& colour)
-{
-	for (auto& light : lights)
-	{
-		if (light.Name() == name)
-		{
-			light.SetColour(colour);
-		}
-	}
-}
+
 
 bool operator==(const GameObject& a, const GameObject& b)
 {

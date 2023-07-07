@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VerticeShapes.h"
-#include "Lighting.h"
+
 #include <string>
 #include <vector>
 #include <directxmath.h>
@@ -11,7 +11,7 @@ class GameObject
 {
 private:
 	vector<VerticeShapes> shapes;
-	vector<Lighting> lights;
+	
 
 	XMFLOAT4X4 transform;
 	XMFLOAT3 mTranslation;
@@ -35,7 +35,7 @@ public:
 	~GameObject();
 
 	const vector<VerticeShapes>& Shapes() const;
-	const vector<Lighting>& Lights() const;	
+	
 	const XMFLOAT3& Up() const;
 	const XMFLOAT3& Right() const;
 	const XMFLOAT3& Forward() const;
@@ -48,7 +48,7 @@ public:
 	void AddShape(const MeshType& geometryType,  const XMFLOAT3& translation, const XMFLOAT3& rotation, const XMFLOAT3& scale, 
 		 const wstring& shader, const string &name, 
 		const vector<InstanceData>* const instanceData, const bool& particleSystem);
-	void AddLight(const XMFLOAT4& translation, const XMFLOAT4& colour, const string& name);
+	
 	void MoveEntity(const XMFLOAT3& translation, const float& timeScale, const float& dt);
 	void RotateEntity(const XMFLOAT3& rotation, const float& timeScale, const float& dt);
 	void RotateAroundPoint(const XMFLOAT3& point, const XMFLOAT3& rotation, const float& timeScale, const float& dt);
