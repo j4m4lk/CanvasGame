@@ -993,7 +993,7 @@ void MainRender::CreateVoxels()
 
 
 	GameObject Voxels(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(0.1f, 0.1f, 0.1f), "Voxels", 0.0f, 0.0f);
-	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(0, 50, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances, false);
+	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(0, 50, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
 	entities.push_back(Voxels);
 	terrain = &Voxels;
 }

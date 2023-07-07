@@ -47,7 +47,7 @@ public:
 
 	void AddShape(const MeshType& geometryType,  const XMFLOAT3& translation, const XMFLOAT3& rotation, const XMFLOAT3& scale, 
 		 const wstring& shader, const string &name, 
-		const vector<InstanceData>* const instanceData, const bool& particleSystem);
+		const vector<InstanceData>* const instanceData);
 	
 	void MoveEntity(const XMFLOAT3& translation, const float& timeScale, const float& dt);
 	void RotateEntity(const XMFLOAT3& rotation, const float& timeScale, const float& dt);

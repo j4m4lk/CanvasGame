@@ -55,7 +55,7 @@ private:
 	string name;
 	MeshType geometryType;
 	
-	bool particlesSystem;
+	
 
 	void Cube();
 	
@@ -64,7 +64,7 @@ public:
 	VerticeShapes();
 	VerticeShapes(const MeshType& geometryType, const XMFLOAT4X4& entityTransform, const XMFLOAT3& translation, const XMFLOAT3& rotation,
 		const XMFLOAT3& scale, const wstring& shader,
-		const string& name, const vector<InstanceData>* const instanceData, const bool& particleSystem);
+		const string& name, const vector<InstanceData>* const instanceData);
 	~VerticeShapes();
 
 	const vector<SimpleVertex>& Vertices() const;

@@ -52,23 +52,23 @@ void VerticeShapes::Cube()
 
 
 VerticeShapes::VerticeShapes() :
-	geometryType(MeshType::CUBE),
+	geometryType(MeshType::CUBE)
 	
-	particlesSystem(0)
+
 {
 }
 
 VerticeShapes::VerticeShapes(const MeshType& geometryType, const XMFLOAT4X4& entityTransform, const XMFLOAT3& translation, const XMFLOAT3& rotation,
 	const XMFLOAT3& scale,  const wstring& shader, 
-	const string& name, const vector<InstanceData>* const instanceData, const bool& particleSystem) :
+	const string& name, const vector<InstanceData>* const instanceData) :
 	translation(translation),
 	rotation(rotation),
 	scale(scale),
 	
 	shader(shader),
 	name(name),
-	geometryType(geometryType),
-	particlesSystem(particleSystem)
+	geometryType(geometryType)
+	
 {
 
 	SetTransform(entityTransform);
@@ -82,8 +82,6 @@ VerticeShapes::VerticeShapes(const MeshType& geometryType, const XMFLOAT4X4& ent
 	
 	case MeshType::CUBE: Cube();
 		break;	
-
-	
 
 	
 	}

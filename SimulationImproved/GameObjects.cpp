@@ -30,7 +30,7 @@ GameObject::~GameObject()
 
 void GameObject::AddShape(const MeshType& geometryType, const XMFLOAT3& translation, const XMFLOAT3& rotation, const XMFLOAT3& scale, 
 	 const wstring& shader, const string& name, 
-	const vector<InstanceData>* const instanceData, const bool& particleSystem)
+	const vector<InstanceData>* const instanceData)
 {
 	
 	switch (geometryType)
@@ -38,7 +38,7 @@ void GameObject::AddShape(const MeshType& geometryType, const XMFLOAT3& translat
 
 	case MeshType::CUBE:
 	{
-		const VerticeShapes Shape(MeshType::CUBE,  transform, translation, rotation, scale,  shader, name, instanceData, particleSystem);
+		const VerticeShapes Shape(MeshType::CUBE,  transform, translation, rotation, scale,  shader, name, instanceData);
 		shapes.push_back(Shape);
 		break;
 	}
