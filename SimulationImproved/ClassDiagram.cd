@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Comment CommentText="CLASS DIAGRAM FOR MAIN SCRIPTS USED">
+    <Position X="19.438" Y="0.569" Height="1.438" Width="1.7" />
+  </Comment>
+  <Class Name="Camera">
+    <Position X="6.25" Y="0.75" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAiAgAQAAAEAAAgQAAAAJADgAAFAwQQCQCAYgQQxAI=</HashCode>
+      <FileName>Camera.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameObject">
+    <Position X="16.5" Y="2.75" Width="6.5" />
+    <Members>
+      <Field Name="right" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>CBAUIgBgAAAAAAAgBgSAApQDAAIEEoQAABCAAgYAxAI=</HashCode>
+      <FileName>GameObjects.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="mTranslation" />
+      <Field Name="right" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Lighting">
+    <Position X="6" Y="9.75" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAIBAAAgAAQAAAQAABAEAACAAAAAABQAAAA=</HashCode>
+      <FileName>Lighting.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="color" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MainRender">
+    <Position X="12" Y="0.75" Width="3.75" />
+    <Members>
+      <Method Name="~MainRender" Hidden="true" />
+      <Method Name="CleanUpDevice" Hidden="true" />
+      <Method Name="CompileShaderFromFile" Hidden="true" />
+      <Method Name="ExitApplication" Hidden="true" />
+      <Method Name="getClicked" Hidden="true" />
+      <Method Name="InitDXDevice" Hidden="true" />
+      <Method Name="InitScene" Hidden="true" />
+      <Method Name="InitWindow" Hidden="true" />
+      <Method Name="MainRender" Hidden="true" />
+      <Field Name="mBlendStateAlpha" Hidden="true" />
+      <Field Name="mBlendStateDisable" Hidden="true" />
+      <Field Name="mBufferDesc" Hidden="true" />
+      <Field Name="mConstantBuffer" Hidden="true" />
+      <Field Name="mD3dDevice" Hidden="true" />
+      <Field Name="mD3dDevice1" Hidden="true" />
+      <Field Name="mDepthStencil" Hidden="true" />
+      <Field Name="mDepthStencilLessThanEqual" Hidden="true" />
+      <Field Name="mDepthStencilView" Hidden="true" />
+      <Field Name="mDriverType" Hidden="true" />
+      <Field Name="mFeatureLevel" Hidden="true" />
+      <Field Name="mHeight" Hidden="true" />
+      <Field Name="mImmediateContext" Hidden="true" />
+      <Field Name="mImmediateContext1" Hidden="true" />
+      <Field Name="mIndexBuffers" Hidden="true" />
+      <Field Name="mInstanceBuffers" Hidden="true" />
+      <Field Name="mLayouts" Hidden="true" />
+      <Field Name="moon" Hidden="true" />
+      <Field Name="mPixelShaders" Hidden="true" />
+      <Field Name="mRasteriserStateBackCull" Hidden="true" />
+      <Field Name="mRasteriserStateNoCull" Hidden="true" />
+      <Field Name="mRenderTargetView" Hidden="true" />
+      <Field Name="mSampler" Hidden="true" />
+      <Field Name="mSwapChain" Hidden="true" />
+      <Field Name="mSwapChain1" Hidden="true" />
+      <Field Name="mTextures" Hidden="true" />
+      <Field Name="mVertexBuffers" Hidden="true" />
+      <Field Name="mVertexShaders" Hidden="true" />
+      <Field Name="mWidth" Hidden="true" />
+      <Field Name="mWnd" Hidden="true" />
+      <Method Name="operator=" Hidden="true" />
+      <Method Name="Render" Hidden="true" />
+      <Method Name="Update" Hidden="true" />
+      <Method Name="VertexIndex" Hidden="true" />
+      <Method Name="WndProc" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>VAQAJCBeBYMsBhRNQRQOQkAGARDgBUAMPJssRAhgQQI=</HashCode>
+      <FileName>MainRender.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="rocketCam" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="VerticeShapes">
+    <Position X="1.5" Y="0.75" Width="4.5" />
+    <TypeIdentifier>
+      <HashCode>QAAQQAEgAEIJEAAAABSwAAZChEAcAAAAUAQEQEUAgAA=</HashCode>
+      <FileName>VerticeShapes.h</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="vertices" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="std::vector&lt;_Ty, _Alloc&gt;" Collapsed="true">
+    <Position X="2.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>A2AEk4EqCrBsCEBAAOMIIAAyEEUEQBIghQkwgkAFUko=</HashCode>
+      <FileName>C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\MSVC\14.29.30133\include\vector</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="XMFLOAT3" Collapsed="true">
+    <Position X="21.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAABgAQAAAAA=</HashCode>
+      <FileName>C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\um\DirectXMath.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="XMFLOAT4" Collapsed="true">
+    <Position X="11.5" Y="12" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAhgAQAAAAA=</HashCode>
+      <FileName>C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\um\DirectXMath.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
