@@ -589,14 +589,21 @@ HRESULT MainRender::Shader(const VerticeShapes& shape)
 		{			
 			D3D11_INPUT_ELEMENT_DESC layout[] =
 			{
-				 { "INSTANCEID", 0, DXGI_FORMAT_R32_SINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+				{ "INSTANCEID", 0, DXGI_FORMAT_R32_SINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 				{ "INSTANCEPOSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+				{ "CUBEID", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 12, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
+				{ "COLORTOAPPLY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 28, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
 			};
+
+			// ...
+
+			// then, you use layout to create the input layout
+
 			UINT numElements = ARRAYSIZE(layout);
 
 			
@@ -952,39 +959,48 @@ void MainRender::CreateCameras()
 }
 
 // to assing ids and color for the cubes 
-XMFLOAT3 assignColorBasedOnId(int id) {
-	// For simplicity, alternate between red, green, and blue
-	switch (id % 3)
-	{
-	case 0: return XMFLOAT3(1.0f, 0.0f, 0.0f);  // Red
-	case 1: return XMFLOAT3(0.0f, 1.0f, 0.0f);  // Green
-	case 2: return XMFLOAT3(0.0f, 0.0f, 1.0f);  // Blue
-	default: return XMFLOAT3(1.0f, 1.0f, 1.0f);  // White (should not reach here)
-	}
-}
 
+XMFLOAT3 assignColorBasedOnId(int id) {
+	XMFLOAT3 color;
+
+	int colorIndex = id % 2;  // Cycle through 2 colors
+
+	switch (colorIndex) {
+	case 0:
+		color = XMFLOAT3(1.0f, 0.0f, 0.0f);  // Red
+		break;
+	case 1:
+		color = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Green
+		break;
+	}
+
+	return color;
+}
 
 void MainRender::CreateVoxels()
 {
 
-	vector<InstanceData> instances;
+	std::vector<InstanceData> instances;
 
 	int id = 0;  // Initialize cube ID counter
 
-	for (int y = 0; y < 2; y++)
-	{
-		for (int z = 0; z < 10; z++)
-		{
-			for (int x = 0; x < 10; x++)
-			{
-				InstanceData instance = { XMFLOAT3(x * -2, y * 2, z * 2), assignColorBasedOnId(id) };
+	for (int y = 0; y < 2; y++) {
+		for (int z = 0; z < 10; z++) {
+			for (int x = 0; x < 10; x++) {
+				InstanceData instance;
+				instance.Pos = DirectX::XMFLOAT3(x * -2, y * 2, z * 2);
+				instance.cubeId = DirectX::XMFLOAT4(id, 0, 0, 0);
+				if (id % 2 != 0) {  // Check if ID is odd
+					instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+				}
+				else {
+					instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				}
 				instances.push_back(instance);
 				id++;
-
 			}
 		}
 	}
-	
 	
 
 

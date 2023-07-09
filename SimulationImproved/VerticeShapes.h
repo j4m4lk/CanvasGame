@@ -29,9 +29,9 @@ struct SimpleVertex
 struct InstanceData
 {
 	XMFLOAT3 Pos;
-	
-	XMFLOAT3 color;
-	XMFLOAT3 instanceColor;
+	XMFLOAT4 cubeId; // New field
+	XMFLOAT4 colorToApply; // New field
+
 	int id;
 
 	bool operator==(const InstanceData& a) const
