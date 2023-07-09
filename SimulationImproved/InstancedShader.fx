@@ -55,7 +55,7 @@ float4 PS(PS_INPUT input) : SV_Target
 {
 	float4 finalColour = input.colorToApply;  // Use the color passed from vertex shader
 
-	float3 viewDir = normalize(vCameraPos - input.PosWorld);
+	float3 viewDir = normalize(vCameraPos - input.PosWorld);//ss
 
 	finalColour.a = 1;
 	return finalColour;
