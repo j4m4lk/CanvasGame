@@ -319,7 +319,7 @@ LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wPara
 	case WM_SYSKEYUP:
 		Keyboard::ProcessMessage(message, wParam, lParam);
 		break;
-
+		//this is moved now will need to remove this 
 	//case WM_LBUTTONDOWN:
 	//	// Left mouse button is clicked
 	//	OutputDebugStringA("Left mouse button down\n");
