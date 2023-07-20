@@ -10,10 +10,9 @@ using namespace std;
 MainRender::MainRender() :
 	mWidth(0),
 	mHeight(0),
-	Resetclicked(false)
-	
+	Resetclicked(false),
+	inputManager(GetActiveWindow()) // Initialize the InputManager in the member initializer list with the active window handle
 {
-
 }
 
 
@@ -317,26 +316,26 @@ LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wPara
 		Keyboard::ProcessMessage(message, wParam, lParam);
 		break;
 
-	case WM_LBUTTONDOWN:
-		// Left mouse button is clicked
-		OutputDebugStringA("Left mouse button down\n");
-		break;
+	//case WM_LBUTTONDOWN:
+	//	// Left mouse button is clicked
+	//	OutputDebugStringA("Left mouse button down\n");
+	//	break;
 
-	case WM_LBUTTONUP:
-		// Left mouse button is released
-		OutputDebugStringA("Left mouse button up\n");
-		break;
+	//case WM_LBUTTONUP:
+	//	// Left mouse button is released
+	//	OutputDebugStringA("Left mouse button up\n");
+	//	break;
 
-	case WM_MOUSEMOVE:
-		// Mouse moved
-		// Extract mouse coordinates from the message parameters
-		mouseX = GET_X_LPARAM(lParam);
-		mouseY = GET_Y_LPARAM(lParam);
-		// Output mouse coordinates
-		char buffer[256];
-		sprintf_s(buffer, "Mouse moved to (%d, %d)\n", mouseX, mouseY);
-		OutputDebugStringA(buffer);
-		break;
+	//case WM_MOUSEMOVE:
+	//	// Mouse moved
+	//	// Extract mouse coordinates from the message parameters
+	//	mouseX = GET_X_LPARAM(lParam);
+	//	mouseY = GET_Y_LPARAM(lParam);
+	//	// Output mouse coordinates
+	//	char buffer[256];
+	//	sprintf_s(buffer, "Mouse moved to (%d, %d)\n", mouseX, mouseY);
+	//	OutputDebugStringA(buffer);
+	//	break;
 
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
@@ -1076,7 +1075,9 @@ MainRender::MainRender(const int& width, const int& height) :
 	height(height),
 	isExit(false),
 	isRocketLaunched(false),
-	isEngineOn(false)
+	isEngineOn(false),
+	inputManager(GetActiveWindow()) // Initialize the InputManager in the member initializer list with the active window handle
+
 {
 }
 
@@ -1132,6 +1133,28 @@ void MainRender::Update(const float& dt)
 	sprintf_s(buffer, "Cursor Position: x = %d, y = %d\n", cursorPos.x, cursorPos.y);
 	OutputDebugStringA(buffer);
 
+	inputManager.Update();
+
+	// Access mouse input data as needed
+	if (inputManager.IsLeftButtonPressed())
+	{
+		OutputDebugStringA("Left mouse button pressed.\n");
+	}
+
+	if (inputManager.IsLeftButtonDown())
+	{
+		OutputDebugStringA("Left mouse button down.\n");
+	}
+
+	if (inputManager.IsLeftButtonReleased())
+	{
+		// Left mouse button was released
+		OutputDebugStringA("Left mouse button released.\n");
+	}
+
+	// Get the mouse position from the InputManager
+	int mouseX = inputManager.GetMouseX();
+	int mouseY = inputManager.GetMouseY();
 
 
 	

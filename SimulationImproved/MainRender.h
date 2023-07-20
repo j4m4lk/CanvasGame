@@ -17,6 +17,7 @@
 #include <chrono>
 #include "resource.h"
 #include <Windowsx.h>
+#include "InputManager.h"
 
 HINSTANCE               g_hInst = nullptr;
 HWND                    g_hWnd = nullptr;
@@ -89,6 +90,9 @@ private:
 	bool isRocketLaunched;
 	bool isEngineOn;
 	bool isReset;
+
+	InputManager inputManager; // Declare the InputManager as a member variable
+
 	
 	unique_ptr<Keyboard> keyboard{};
 

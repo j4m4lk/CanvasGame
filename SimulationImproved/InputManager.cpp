@@ -1,20 +1,19 @@
 #include "InputManager.h"
-InputManager::InputManager(HWND windowHandle) : hWnd(windowHandle), isLeftButtonDown(false), wasLeftButtonDown(false)
-{
 
+InputManager::InputManager(HWND windowHandle) : hWnd(windowHandle), isLeftButtonDown(false), wasLeftButtonDown(false), mouseX(0), mouseY(0)
+{
 }
 
 void InputManager::Update()
 {
     wasLeftButtonDown = isLeftButtonDown;
+    isLeftButtonDown = GetAsyncKeyState(VK_LBUTTON) & 0x8000;
 
-    // Check if left mouse button is currently down
-    isLeftButtonDown = (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
-
-    // Debug messages
-    OutputDebugStringA("Left Button Down: ");
-    OutputDebugStringA(isLeftButtonDown ? "true\n" : "false\n");
-
+    POINT cursorPos;
+    GetCursorPos(&cursorPos);
+    ScreenToClient(hWnd, &cursorPos);
+    mouseX = cursorPos.x;
+    mouseY = cursorPos.y;
 }
 
 bool InputManager::IsLeftButtonDown() const
@@ -30,4 +29,14 @@ bool InputManager::IsLeftButtonPressed() const
 bool InputManager::IsLeftButtonReleased() const
 {
     return !isLeftButtonDown && wasLeftButtonDown;
+}
+
+int InputManager::GetMouseX() const
+{
+    return mouseX;
+}
+
+int InputManager::GetMouseY() const
+{
+    return mouseY;
 }
