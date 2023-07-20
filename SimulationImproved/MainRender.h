@@ -4,7 +4,7 @@
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <directxcolors.h>
-#include "DDSTextureLoader.h"
+
 #include "GameObjects.h"
 #include "VerticeShapes.h"
 #include "Camera.h"
