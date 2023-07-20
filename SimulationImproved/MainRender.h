@@ -16,6 +16,7 @@
 #include <windows.h>
 #include <chrono>
 #include "resource.h"
+#include <Windowsx.h>
 
 HINSTANCE               g_hInst = nullptr;
 HWND                    g_hWnd = nullptr;

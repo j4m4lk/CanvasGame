@@ -1,7 +1,10 @@
 #include "MainRender.h"
+#include <Windows.h>
+
 
 using namespace DirectX;
 using namespace std;
+
 
 
 MainRender::MainRender() :
@@ -19,7 +22,12 @@ MainRender::~MainRender()
 }
 
 
-
+POINT GetCursorPosition()
+{
+	POINT cursorPos;
+	GetCursorPos(&cursorPos);
+	return cursorPos;
+}
 
 void MainRender::SetWindow(const HWND& Wnd)
 {
@@ -286,16 +294,17 @@ HRESULT MainRender::InitDXDevice()
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND  hwnd, UINT  umsg, WPARAM wparam, LPARAM  lparam);
 LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam)
 {
+	static int mouseX, mouseY; // Declare the variables outside the switch statement
+
+
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 		return true;
-
 
 	switch (message)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-
 
 	case WM_ACTIVATEAPP:
 		Keyboard::ProcessMessage(message, wParam, lParam);
@@ -306,6 +315,27 @@ LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wPara
 	case WM_KEYUP:
 	case WM_SYSKEYUP:
 		Keyboard::ProcessMessage(message, wParam, lParam);
+		break;
+
+	case WM_LBUTTONDOWN:
+		// Left mouse button is clicked
+		OutputDebugStringA("Left mouse button down\n");
+		break;
+
+	case WM_LBUTTONUP:
+		// Left mouse button is released
+		OutputDebugStringA("Left mouse button up\n");
+		break;
+
+	case WM_MOUSEMOVE:
+		// Mouse moved
+		// Extract mouse coordinates from the message parameters
+		mouseX = GET_X_LPARAM(lParam);
+		mouseY = GET_Y_LPARAM(lParam);
+		// Output mouse coordinates
+		char buffer[256];
+		sprintf_s(buffer, "Mouse moved to (%d, %d)\n", mouseX, mouseY);
+		OutputDebugStringA(buffer);
 		break;
 
 	default:
@@ -916,9 +946,9 @@ void MainRender::CheckInput(const float& dt)
 	}
 	if (kb.T)
 	{
-		timescale -= 0.05f;
-		// to avoid goin in reverse 
-		if (timescale <= 1) timescale = 1;
+		//timescale -= 0.05f;
+		//// to avoid goin in reverse 
+		//if (timescale <= 1) timescale = 1;
 	}
 	if (kb.LeftShift && kb.T)
 	{
@@ -934,7 +964,7 @@ void MainRender::CreateCameras()
 	const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
 	//camera 1 Position
-	Camera newCamera(true, XMFLOAT3(0.5f, 9.0f, 0), XMFLOAT3(XMConvertToRadians(90), 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
+	Camera newCamera(true, XMFLOAT3(-10.0f, 20.0f, 8), XMFLOAT3(XMConvertToRadians(90), 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
 	cameras.push_back(newCamera);
 
 	//camera 2 Position
@@ -958,7 +988,7 @@ void MainRender::CreateCameras()
 	
 }
 
-// to assing ids and color for the cubes 
+// to assing ids and color for the cubes not bieng used 
 
 XMFLOAT3 assignColorBasedOnId(int id) {
 	XMFLOAT3 color;
@@ -990,12 +1020,15 @@ void MainRender::CreateVoxels()
 				InstanceData instance;
 				instance.Pos = DirectX::XMFLOAT3(x * -2, y * 2, z * 2);
 				instance.cubeId = DirectX::XMFLOAT4(id, 0, 0, 0);
-				if (id % 2 != 0) {  // Check if ID is odd
-					instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
-				}
-				else {
-					instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
-				}
+
+				instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				//this is for testing 
+				//if (id % 2 != 0) {  // Check if ID is odd
+				//	instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+				//}
+				//else {
+				//	instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				//}
 				instances.push_back(instance);
 				id++;
 			}
@@ -1008,8 +1041,8 @@ void MainRender::CreateVoxels()
 
 
 
-	GameObject Voxels(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(0.1f, 0.1f, 0.1f), "Voxels", 0.0f, 0.0f);
-	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(0, 50, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
+	GameObject Voxels(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), "Voxels", 0.0f, 0.0f);
+	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
 	entities.push_back(Voxels);
 	terrain = &Voxels;
 }
@@ -1093,11 +1126,20 @@ void MainRender::Update(const float& dt)
 
 	CheckInput(dt);
 
+	
+	POINT cursorPos = GetCursorPosition();
+	char buffer[100];
+	sprintf_s(buffer, "Cursor Position: x = %d, y = %d\n", cursorPos.x, cursorPos.y);
+	OutputDebugStringA(buffer);
 
 
 
 	
 }
+
+//
+
+
 
 const Camera* const MainRender::ActiveCamera() const
 {

@@ -49,6 +49,9 @@
     <ClCompile Include="MainRender.cpp">
       <Filter>SourceFiles</Filter>
     </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>SourceFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="InstancedShader.fx">
@@ -99,6 +102,9 @@
       <Filter>ImGui</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

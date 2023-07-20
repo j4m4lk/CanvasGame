@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="MainRender.cpp" />
     <ClCompile Include="GameObjects.cpp" />
     <ClCompile Include="Imgui\imgui.cpp" />
@@ -187,6 +188,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="MainRender.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="Imgui\imconfig.h" />
