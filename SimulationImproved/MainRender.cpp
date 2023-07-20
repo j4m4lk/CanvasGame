@@ -289,11 +289,15 @@ HRESULT MainRender::InitDXDevice()
 	return static_cast<HRESULT>(0L);
 }
 
+
+
+
+
 //Listen for Messages to register inputs
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND  hwnd, UINT  umsg, WPARAM wparam, LPARAM  lparam);
 LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam)
 {
-	static int mouseX, mouseY; // Declare the variables outside the switch statement
+	//static int mouseX, mouseY; // Declare the variables outside the switch statement
 
 
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
@@ -337,12 +341,17 @@ LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wPara
 	//	OutputDebugStringA(buffer);
 	//	break;
 
+	
+	break;
+
+
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	return 0;
 }
+
 
 HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* const camera, const float& time)
 {

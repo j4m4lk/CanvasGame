@@ -150,4 +150,7 @@ public:
 	void camsetting(int ch);
 
 	
+	
+
+
 };
