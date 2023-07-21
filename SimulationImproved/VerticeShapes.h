@@ -35,10 +35,10 @@ struct InstanceData
 {
 	XMFLOAT3 Pos;
 	XMFLOAT4 cubeId; // New field
-	XMFLOAT4 colorToApply; // New field
+	XMFLOAT4 originalColor;
+	XMFLOAT4 hitColor;
 	AABB aabb;  // New field
-
-
+	int isHit;
 	int id;
 
 	bool operator==(const InstanceData& a) const

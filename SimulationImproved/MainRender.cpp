@@ -628,14 +628,16 @@ HRESULT MainRender::Shader(const VerticeShapes& shape)
 			D3D11_INPUT_ELEMENT_DESC layout[] =
 			{
 				{ "INSTANCEID", 0, DXGI_FORMAT_R32_SINT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "INSTANCEPOSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
-				{ "CUBEID", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 12, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
-				{ "COLORTOAPPLY", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 28, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
+		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "INSTANCEPOSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
+		{ "CUBEID", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 12, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // keep as it is
+		{ "ORIGINALCOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 28, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // replace colorToApply with originalColor
+		{ "HITCOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 44, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
+		{ "ISHIT", 0, DXGI_FORMAT_R32_SINT, 1, 60, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
 			};
 
 			// ...
@@ -1037,8 +1039,10 @@ void MainRender::CreateVoxels()
 			for (int x = 0; x < 10; x++) {
 				InstanceData instance;
 				instance.Pos = DirectX::XMFLOAT3(x * -2, y * 2, z * 2);
-				instance.cubeId = DirectX::XMFLOAT4(id, 0, 0, 0);
-				instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				instance.id = id;  
+				instance.originalColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				instance.hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // Black
+				instance.isHit = 0; // initially, the cube hasn't been hit
 				instance.aabb.center = instance.Pos;
 				instance.aabb.extents = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f); // Half the size of the cube
 
@@ -1154,7 +1158,7 @@ void MainRender::Update(const float& dt)
 	/*char buffer[100];
 	sprintf_s(buffer, "Cursor Position: x = %d, y = %d\n", cursorPos.x, cursorPos.y);
 	OutputDebugStringA(buffer);*/
-
+	
 	inputManager.Update();
 
 	// Access mouse input data as needed
@@ -1166,14 +1170,6 @@ void MainRender::Update(const float& dt)
 	if (inputManager.IsLeftButtonDown())
 	{
 		OutputDebugStringA("Left mouse button down.\n");
-		// Mouse position in screen space (should be normalized [-1, 1])
-		int mousePixelX = inputManager.GetMouseX();
-		int mousePixelY = inputManager.GetMouseY();
-
-		// Convert from pixel space to normalized space
-		DirectX::XMFLOAT2 mousePos;
-		mousePos.x = (2.0f * mousePixelX / width) - 1.0f;
-		mousePos.y = 1.0f - (2.0f * mousePixelY / height);
 
 		// Check if activeCam is not null
 		if (activeCam)
@@ -1182,25 +1178,26 @@ void MainRender::Update(const float& dt)
 			DirectX::XMFLOAT4X4 viewMatrix = activeCam->View();
 			DirectX::XMFLOAT4X4 projMatrix = activeCam->Projection();
 
-			// Unproject mouse position to 3D world space
-			DirectX::XMVECTOR mouseRayOrigin, mouseRayDir;
+			// Extract the forward vector from the view matrix
+			DirectX::XMVECTOR mouseRayDir = DirectX::XMVectorSet(viewMatrix._31, viewMatrix._32, viewMatrix._33, 0.0f);
 
-			mouseRayOrigin = DirectX::XMVector3Unproject(DirectX::XMVectorSet(mousePos.x, mousePos.y, 0.0f, 1.0f),
-				0, 0, 1.0f, 1.0f,
-				0, 1,
-				DirectX::XMLoadFloat4x4(&projMatrix),
-				DirectX::XMLoadFloat4x4(&viewMatrix),
-				DirectX::XMMatrixIdentity());
+			// Normalize the forward vector (if not already normalized)
+			mouseRayDir = DirectX::XMVector3Normalize(mouseRayDir);
 
-			mouseRayDir = DirectX::XMVector3Unproject(DirectX::XMVectorSet(mousePos.x, mousePos.y, 1.0f, 1.0f),
-				0, 0, 1.0f, 1.0f,
-				0, 1,
-				DirectX::XMLoadFloat4x4(&projMatrix),
-				DirectX::XMLoadFloat4x4(&viewMatrix),
-				DirectX::XMMatrixIdentity());
+			// The ray origin is the camera's position
+			DirectX::XMVECTOR mouseRayOrigin = DirectX::XMLoadFloat3(&activeCam->Position());
 
-			// Normalize the ray direction
-			mouseRayDir = DirectX::XMVector3Normalize(mouseRayDir - mouseRayOrigin);
+			// Print out the ray origin and direction
+			DirectX::XMFLOAT3 origin, direction;
+			DirectX::XMStoreFloat3(&origin, mouseRayOrigin);
+			DirectX::XMStoreFloat3(&direction, mouseRayDir);
+
+			char buffer[200];
+			sprintf_s(buffer, "Ray Origin: (%f, %f, %f)\n", origin.x, origin.y, origin.z);
+			OutputDebugStringA(buffer);
+
+			sprintf_s(buffer, "Ray Direction: (%f, %f, %f)\n", direction.x, direction.y, direction.z);
+			OutputDebugStringA(buffer);
 
 			// You now have a ray that can be used
 
@@ -1218,7 +1215,7 @@ void MainRender::Update(const float& dt)
 						char buffer[100];
 						sprintf_s(buffer, "Raycast hit cube ID: %d\n", instance.id);
 						OutputDebugStringA(buffer);
-
+						instance.isHit = 1; // Mark the cube as hit
 						break;
 					}
 				}
@@ -1229,8 +1226,8 @@ void MainRender::Update(const float& dt)
 			// Handle error: activeCam is null
 			OutputDebugStringA("Error: activeCam is null.\n");
 		}
-
 	}
+
 
 	if (inputManager.IsLeftButtonReleased())
 	{
