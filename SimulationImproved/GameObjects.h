@@ -58,6 +58,8 @@ public:
 	void SetRotationSpeed(const float& speed);
 	void RemoveInstancesFromShape(const string& name, const vector<InstanceData>& instances);
 	void ChangeLightColour(const string& name, const XMFLOAT4& colour);
+
+	std::vector<InstanceData> GetInstances() const;
 };
 
 bool operator==(const GameObject& a, const GameObject& b);

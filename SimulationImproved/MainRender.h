@@ -149,7 +149,8 @@ public:
 	const bool& ExitApplication() const;
 	void camsetting(int ch);
 
-	
+	bool IsRayIntersectingAABB(const DirectX::XMVECTOR& rayOrigin, const DirectX::XMVECTOR& rayDir, const AABB& aabb);
+
 	
 
 

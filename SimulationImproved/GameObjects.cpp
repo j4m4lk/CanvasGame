@@ -212,6 +212,22 @@ void GameObject::RemoveInstancesFromShape(const string& name, const vector<Insta
 	}
 }
 
+std::vector<InstanceData> GameObject::GetInstances() const
+{
+	std::vector<InstanceData> allInstances;
+
+	// Loop over each shape in the GameObject
+	for (const auto& shape : shapes)
+	{
+		// Get instances from this shape
+		std::vector<InstanceData> shapeInstances = shape.Instances();
+
+		// Add instances from this shape to allInstances
+		allInstances.insert(allInstances.end(), shapeInstances.begin(), shapeInstances.end());
+	}
+
+	return allInstances;
+}
 
 
 bool operator==(const GameObject& a, const GameObject& b)

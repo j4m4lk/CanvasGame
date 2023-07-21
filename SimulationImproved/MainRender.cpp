@@ -975,45 +975,55 @@ void MainRender::CreateCameras()
 	Camera newCamera(true, XMFLOAT3(-10.0f, 20.0f, 8), XMFLOAT3(XMConvertToRadians(90), 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
 	cameras.push_back(newCamera);
 
-	//camera 2 Position
-	newCamera = Camera(true, XMFLOAT3(-2.0f, 12, 2.0f), XMFLOAT3(XMConvertToRadians(90), 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
-	cameras.push_back(newCamera);
-
-	//camera 3 Position
-	newCamera = Camera(false, XMFLOAT3(0.5f, 8.2f, 1.0f), XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 2.5f, 2.4f), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
-	cameras.push_back(newCamera);
-
-	//camera 4 Position
-	newCamera = Camera(false, XMFLOAT3(0.5f, 8.2f, 1.0f), XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
-	cameras.push_back(newCamera);
-
-	//camera 5 Position
-	newCamera = Camera(false, XMFLOAT3(0.5f, 8.2f, 2.0f), XMFLOAT3(0, 0, 0), XMFLOAT3(0.5f, 2.4f, 2.4f), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
-	cameras.push_back(newCamera);
+	
 
 	//Assign the camera pointers to cameras;
 	activeCam = &cameras[0];
 	
 }
 
-// to assing ids and color for the cubes not bieng used 
 
-XMFLOAT3 assignColorBasedOnId(int id) {
-	XMFLOAT3 color;
+bool AABBIntersect(const AABB& box, const DirectX::XMVECTOR& rayOrigin, const DirectX::XMVECTOR& rayDir)
+{
+	DirectX::XMFLOAT3 dir = DirectX::XMFLOAT3(DirectX::XMVectorGetX(rayDir), DirectX::XMVectorGetY(rayDir), DirectX::XMVectorGetZ(rayDir));
 
-	int colorIndex = id % 2;  // Cycle through 2 colors
+	float tmin = (box.center.x - box.extents.x - DirectX::XMVectorGetX(rayOrigin)) / dir.x;
+	float tmax = (box.center.x + box.extents.x - DirectX::XMVectorGetX(rayOrigin)) / dir.x;
 
-	switch (colorIndex) {
-	case 0:
-		color = XMFLOAT3(1.0f, 0.0f, 0.0f);  // Red
-		break;
-	case 1:
-		color = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Green
-		break;
-	}
+	if (tmin > tmax) std::swap(tmin, tmax);
 
-	return color;
+	float tymin = (box.center.y - box.extents.y - DirectX::XMVectorGetY(rayOrigin)) / dir.y;
+	float tymax = (box.center.y + box.extents.y - DirectX::XMVectorGetY(rayOrigin)) / dir.y;
+
+	if (tymin > tymax) std::swap(tymin, tymax);
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (box.center.z - box.extents.z - DirectX::XMVectorGetZ(rayOrigin)) / dir.z;
+	float tzmax = (box.center.z + box.extents.z - DirectX::XMVectorGetZ(rayOrigin)) / dir.z;
+
+	if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	return ((tmin < 0) && (tmax > 0)) || (tmin < 0);
 }
+
+
 
 void MainRender::CreateVoxels()
 {
@@ -1028,8 +1038,12 @@ void MainRender::CreateVoxels()
 				InstanceData instance;
 				instance.Pos = DirectX::XMFLOAT3(x * -2, y * 2, z * 2);
 				instance.cubeId = DirectX::XMFLOAT4(id, 0, 0, 0);
-
 				instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				instance.aabb.center = instance.Pos;
+				instance.aabb.extents = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f); // Half the size of the cube
+
+				instances.push_back(instance);
+				id++;
 				//this is for testing 
 				//if (id % 2 != 0) {  // Check if ID is odd
 				//	instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
@@ -1037,8 +1051,7 @@ void MainRender::CreateVoxels()
 				//else {
 				//	instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
 				//}
-				instances.push_back(instance);
-				id++;
+				
 			}
 		}
 	}
@@ -1138,9 +1151,9 @@ void MainRender::Update(const float& dt)
 
 	
 	POINT cursorPos = GetCursorPosition();
-	char buffer[100];
+	/*char buffer[100];
 	sprintf_s(buffer, "Cursor Position: x = %d, y = %d\n", cursorPos.x, cursorPos.y);
-	OutputDebugStringA(buffer);
+	OutputDebugStringA(buffer);*/
 
 	inputManager.Update();
 
@@ -1153,6 +1166,70 @@ void MainRender::Update(const float& dt)
 	if (inputManager.IsLeftButtonDown())
 	{
 		OutputDebugStringA("Left mouse button down.\n");
+		// Mouse position in screen space (should be normalized [-1, 1])
+		int mousePixelX = inputManager.GetMouseX();
+		int mousePixelY = inputManager.GetMouseY();
+
+		// Convert from pixel space to normalized space
+		DirectX::XMFLOAT2 mousePos;
+		mousePos.x = (2.0f * mousePixelX / width) - 1.0f;
+		mousePos.y = 1.0f - (2.0f * mousePixelY / height);
+
+		// Check if activeCam is not null
+		if (activeCam)
+		{
+			// Camera's view and projection matrices
+			DirectX::XMFLOAT4X4 viewMatrix = activeCam->View();
+			DirectX::XMFLOAT4X4 projMatrix = activeCam->Projection();
+
+			// Unproject mouse position to 3D world space
+			DirectX::XMVECTOR mouseRayOrigin, mouseRayDir;
+
+			mouseRayOrigin = DirectX::XMVector3Unproject(DirectX::XMVectorSet(mousePos.x, mousePos.y, 0.0f, 1.0f),
+				0, 0, 1.0f, 1.0f,
+				0, 1,
+				DirectX::XMLoadFloat4x4(&projMatrix),
+				DirectX::XMLoadFloat4x4(&viewMatrix),
+				DirectX::XMMatrixIdentity());
+
+			mouseRayDir = DirectX::XMVector3Unproject(DirectX::XMVectorSet(mousePos.x, mousePos.y, 1.0f, 1.0f),
+				0, 0, 1.0f, 1.0f,
+				0, 1,
+				DirectX::XMLoadFloat4x4(&projMatrix),
+				DirectX::XMLoadFloat4x4(&viewMatrix),
+				DirectX::XMMatrixIdentity());
+
+			// Normalize the ray direction
+			mouseRayDir = DirectX::XMVector3Normalize(mouseRayDir - mouseRayOrigin);
+
+			// You now have a ray that can be used
+
+			// Loop through each GameObject (Voxel) in the entities list
+			for (auto& voxel : entities)
+			{
+				// Get the instances (cubes) associated with this GameObject
+				auto instances = voxel.GetInstances();
+
+				// Loop through each instance (cube) and check for intersection
+				for (auto& instance : instances)
+				{
+					if (AABBIntersect(instance.aabb, mouseRayOrigin, mouseRayDir))
+					{
+						char buffer[100];
+						sprintf_s(buffer, "Raycast hit cube ID: %d\n", instance.id);
+						OutputDebugStringA(buffer);
+
+						break;
+					}
+				}
+			}
+		}
+		else
+		{
+			// Handle error: activeCam is null
+			OutputDebugStringA("Error: activeCam is null.\n");
+		}
+
 	}
 
 	if (inputManager.IsLeftButtonReleased())

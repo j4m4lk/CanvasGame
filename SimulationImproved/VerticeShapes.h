@@ -25,12 +25,19 @@ struct SimpleVertex
 	XMFLOAT3 BiTangent;
 };
 
+struct AABB
+{
+	DirectX::XMFLOAT3 center;
+	DirectX::XMFLOAT3 extents;
+};
 
 struct InstanceData
 {
 	XMFLOAT3 Pos;
 	XMFLOAT4 cubeId; // New field
 	XMFLOAT4 colorToApply; // New field
+	AABB aabb;  // New field
+
 
 	int id;
 
