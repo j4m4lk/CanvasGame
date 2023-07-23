@@ -60,6 +60,11 @@ public:
 	void ChangeLightColour(const string& name, const XMFLOAT4& colour);
 
 	std::vector<InstanceData> GetInstances() const;
+	
+	std::vector<VerticeShapes>& GetShapes();
+	InstanceData& GameObject::GetInstance(const std::string& shapeName, size_t index);
+
+
 };
 
 bool operator==(const GameObject& a, const GameObject& b);

@@ -228,6 +228,34 @@ std::vector<InstanceData> GameObject::GetInstances() const
 
 	return allInstances;
 }
+std::vector<VerticeShapes>& GameObject::GetShapes()
+{
+	return shapes;
+}
+
+InstanceData& GameObject::GetInstance(const std::string& shapeName, size_t index) {
+	// Search for the shape by its name
+	auto it = std::find_if(shapes.begin(), shapes.end(), [&](const VerticeShapes& shape) {
+		return shape.Name() == shapeName;
+		});
+
+	// If shapeName does not exist, throw an exception or handle the error
+	if (it == shapes.end()) {
+		throw std::out_of_range("Shape name not found");
+	}
+
+	// Get the instances for this shape
+	std::vector<InstanceData> shapeInstances = it->Instances();
+
+	// Check if index is within bounds of the instances vector
+	if (index >= shapeInstances.size()) {
+		// If index is out of bounds, throw an exception or handle the error
+		throw std::out_of_range("Index out of range for shape instances");
+	}
+
+	// Return the InstanceData at the given index
+	return shapeInstances[index];
+}
 
 
 bool operator==(const GameObject& a, const GameObject& b)

@@ -5,6 +5,8 @@
 #include <directxmath.h>
 #include <Windows.h>
 #include <algorithm>
+#include <stdexcept>
+
 using namespace DirectX;
 using namespace std;
 
@@ -82,7 +84,9 @@ public:
 	const XMFLOAT4X4& Transform() const;
 	const MeshType& Geometry() const;
 	const string& Name() const;
-	
+
+	InstanceData& VerticeShapes::GetInstance(size_t index);
+
 
 	void SetTransform(const XMFLOAT4X4& entityTransform);
 	void RemoveInstances(const vector<InstanceData>& instancesToRemove);

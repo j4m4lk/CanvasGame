@@ -526,15 +526,14 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 
 
 	if (shape.Instances().size() > 0)
-	{	
+	{
 		if (mInstanceBuffers.count(shape.Name()) == 0)
 		{
-			
 			ZeroMemory(&mBufferDesc, sizeof(mBufferDesc));
-			mBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+			mBufferDesc.Usage = D3D11_USAGE_DYNAMIC;  // Buffer will be updated frequently
 			mBufferDesc.ByteWidth = sizeof(InstanceData) * shape.Instances().size();
 			mBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			mBufferDesc.CPUAccessFlags = 0;
+			mBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;  // CPU will be writing to this buffer
 			D3D11_SUBRESOURCE_DATA InitData;
 			ZeroMemory(&InitData, sizeof(InitData));
 			InitData.pSysMem = &(shape.Instances()[0]);
@@ -543,18 +542,53 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 			if (FAILED(hr))
 			{
 				return hr;
-			}		
-			mInstanceBuffers.insert(pair<string, ID3D11Buffer*>(shape.Name(), instanceBuffer));			
+			}
+			mInstanceBuffers.insert(pair<string, ID3D11Buffer*>(shape.Name(), instanceBuffer));
 			const UINT stride = sizeof(InstanceData);
 			const UINT offset = 0;
 			mImmediateContext->IASetVertexBuffers(1, 1, &instanceBuffer, &stride, &offset);
 		}
 		else
-		{			
+		{
 			const UINT stride = sizeof(InstanceData);
 			const UINT offset = 0;
 			mImmediateContext->IASetVertexBuffers(1, 1, &mInstanceBuffers[shape.Name()], &stride, &offset);
-		    mImmediateContext->UpdateSubresource(mInstanceBuffers[shape.Name()], 0, nullptr, &(shape.Instances()[0]), 0, 0);
+			// Map the buffer, update it and unmap it
+			D3D11_MAPPED_SUBRESOURCE mappedResource;
+			ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+			// Disable GPU access to the vertex buffer data.
+			mImmediateContext->Map(mInstanceBuffers[shape.Name()], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+			// Update the vertex buffer here.
+			InstanceData* dataPtr = (InstanceData*)mappedResource.pData;
+
+			for (size_t i = 0; i < shape.Instances().size(); i++)
+			{
+				dataPtr[i] = shape.Instances()[i];  // Copy the instance data
+
+				char buffer[200];
+				sprintf_s(buffer, "Instance ID: %d, isHit: %d\n", dataPtr[i].id, dataPtr[i].isHit);
+				OutputDebugStringA(buffer);
+
+				if (std::find(hitCubeIds.begin(), hitCubeIds.end(), dataPtr[i].id) != hitCubeIds.end())
+				{
+					// If the cube's ID is in the hitCubeIds list, mark it as hit and set the hit color
+					dataPtr[i].isHit = 1;
+					dataPtr[i].hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);  // Set to green, adjust to your preference
+				}
+				else
+				{
+					// Otherwise, mark it as not hit
+					dataPtr[i].isHit = 0;
+					// and reset the hitColor to the originalColor (or to whatever color you want when the cube is not hit)
+					dataPtr[i].hitColor = dataPtr[i].originalColor;
+				}
+			}
+
+
+			// Reenable GPU access to the vertex buffer data.
+			mImmediateContext->Unmap(mInstanceBuffers[shape.Name()], 0);
 		}
 	}
 
@@ -974,7 +1008,7 @@ void MainRender::CreateCameras()
 	const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
 	//camera 1 Position
-	Camera newCamera(true, XMFLOAT3(-10.0f, 20.0f, 8), XMFLOAT3(XMConvertToRadians(90), 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
+	Camera newCamera(true, XMFLOAT3(0.0f, 0.0f, 10), XMFLOAT3(0, XMConvertToRadians(190), 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
 	cameras.push_back(newCamera);
 
 	
@@ -1035,27 +1069,24 @@ void MainRender::CreateVoxels()
 	int id = 0;  // Initialize cube ID counter
 
 	for (int y = 0; y < 2; y++) {
-		for (int z = 0; z < 10; z++) {
-			for (int x = 0; x < 10; x++) {
+		for (int z = 0; z < 5; z++) {
+			for (int x = 0; x < 5; x++) {
 				InstanceData instance;
-				instance.Pos = DirectX::XMFLOAT3(x * -2, y * 2, z * 2);
-				instance.id = id;  
-				instance.originalColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
-				instance.hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // Black
-				instance.isHit = 0; // initially, the cube hasn't been hit
+				instance.Pos = DirectX::XMFLOAT3(x * -2.5, y * 2.5, -20 - z * 3);
+				instance.id = id;
 				instance.aabb.center = instance.Pos;
-				instance.aabb.extents = DirectX::XMFLOAT3(0.5f, 0.5f, 0.5f); // Half the size of the cube
+				instance.aabb.extents = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
+				instance.isHit = 0;
+
+				// Set the original color to red for all cubes
+				instance.originalColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+
+				// Set the hit color to black for all cubes
+				instance.hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // Black
+				
 
 				instances.push_back(instance);
 				id++;
-				//this is for testing 
-				//if (id % 2 != 0) {  // Check if ID is odd
-				//	instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
-				//}
-				//else {
-				//	instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
-				//}
-				
 			}
 		}
 	}
@@ -1073,7 +1104,13 @@ void MainRender::CreateVoxels()
 }
 
 
-
+//this is for testing 
+				//if (id % 2 != 0) {  // Check if ID is odd
+				//	instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+				//}
+				//else {
+				//	instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+				//}
 
 
 
@@ -1161,6 +1198,27 @@ void MainRender::Update(const float& dt)
 	
 	inputManager.Update();
 
+	// ... in MainRender::Update ...
+
+// Loop through each GameObject (Voxel) in the entities list
+	for (auto& voxel : entities)
+	{
+		// Get the shapes associated with this GameObject
+		auto& shapes = voxel.GetShapes();
+
+		// Loop through each shape and its instances and check for intersection
+		for (auto& shape : shapes)
+		{
+			auto& instances = shape.Instances();
+
+			for (auto& instance : instances)
+			{
+				// ... Intersection test and instance updating code ...
+			}
+		}
+	}
+
+
 	// Access mouse input data as needed
 	if (inputManager.IsLeftButtonPressed())
 	{
@@ -1204,19 +1262,49 @@ void MainRender::Update(const float& dt)
 			// Loop through each GameObject (Voxel) in the entities list
 			for (auto& voxel : entities)
 			{
-				// Get the instances (cubes) associated with this GameObject
-				auto instances = voxel.GetInstances();
-
-				// Loop through each instance (cube) and check for intersection
-				for (auto& instance : instances)
+				auto& shapes = voxel.GetShapes();
+				for (auto& shape : shapes)
 				{
-					if (AABBIntersect(instance.aabb, mouseRayOrigin, mouseRayDir))
+					auto& instances = shape.Instances();
+
+					// Use indexed loop to get reference to instance
+					for (size_t i = 0; i < instances.size(); ++i)
 					{
-						char buffer[100];
-						sprintf_s(buffer, "Raycast hit cube ID: %d\n", instance.id);
-						OutputDebugStringA(buffer);
-						instance.isHit = 1; // Mark the cube as hit
-						break;
+						auto& instance = shape.GetInstance(i);
+						if (AABBIntersect(instance.aabb, mouseRayOrigin, mouseRayDir))
+						{
+							char buffer[100];
+							sprintf_s(buffer, "Raycast hit cube ID: %d\n", instance.id);
+							OutputDebugStringA(buffer);
+							// Here's the important part:
+							// Update the instance data to mark this cube as hit
+							instance.isHit = 1;
+							instance.hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);  // This sets the hitColor to green, adjust to desired color
+
+
+							//// Map the buffer, update it and unmap it
+							//D3D11_MAPPED_SUBRESOURCE mappedResource;
+							//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+
+							//// Disable GPU access to the vertex buffer data.
+							//mImmediateContext->Map(mInstanceBuffers[shape.Name()], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+							//// Update the vertex buffer here.
+							//InstanceData* dataPtr = (InstanceData*)mappedResource.pData;
+
+							//// Copy the updated instance data
+							//dataPtr[i] = instance;
+
+							//// Reenable GPU access to the vertex buffer data.
+							//mImmediateContext->Unmap(mInstanceBuffers[shape.Name()], 0);
+
+							
+							// TODO: Update the instance buffer on the GPU to reflect these changes.
+
+							hitCubeIds.push_back(instance.id);  // Add the hit cube's ID to the list
+							break;
+						}
 					}
 				}
 			}

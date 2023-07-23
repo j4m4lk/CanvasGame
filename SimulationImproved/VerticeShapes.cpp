@@ -132,6 +132,15 @@ const string& VerticeShapes::Name() const
 	return name;
 }
 
+InstanceData& VerticeShapes::GetInstance(size_t index)
+{
+	if (index >= mInstanceData.size())
+	{
+		throw std::out_of_range("Index out of range in GetInstance");
+	}
+
+	return mInstanceData[index];
+}
 
 
 void VerticeShapes::SetTransform(const XMFLOAT4X4& entityTransform)

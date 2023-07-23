@@ -48,7 +48,7 @@ PS_INPUT VS(VS_INPUT input)
 
 	if (input.isHit == 1)  // Checking if isHit is 1 instead of true
 	{
-		output.colorToApply = input.hitColor; // Use the hit color if the cube has been hit
+		output.colorToApply = float4(1.0f, 1.0f,1.0f, 1.0f); // Use the hit color if the cube has been hit
 	}
 	else
 	{

@@ -30,6 +30,7 @@ struct ConstantBuffer
 	XMFLOAT4X4 mProjection;
 
 	XMFLOAT4 vCameraPos;
+	XMFLOAT4 colorToApply; 
 	float numOfLights;
 	float time;
 	XMFLOAT2 padding;
@@ -83,7 +84,7 @@ private:
 	vector<Camera> cameras;
 	vector<GameObject> entities;
 	float timescale;
-	
+	std::vector<int> hitCubeIds;
 	int width;
 	int height;
 	bool isExit;
