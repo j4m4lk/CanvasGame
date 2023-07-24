@@ -39,9 +39,12 @@ struct InstanceData
 	XMFLOAT4 cubeId; // New field
 	XMFLOAT4 originalColor;
 	XMFLOAT4 hitColor;
+	XMFLOAT4 color;
 	AABB aabb;  // New field
 	int isHit;
 	int id;
+	float mass;  // New field
+
 
 	bool operator==(const InstanceData& a) const
 	{
@@ -86,8 +89,10 @@ public:
 	const string& Name() const;
 
 	InstanceData& VerticeShapes::GetInstance(size_t index);
-
-
+	// Add new methods to retrieve ID and mass of a cube by its index
+	int GetCubeId(size_t index);
+	float GetCubeMass(size_t index);
+	std::size_t InstanceCount() const;
 	void SetTransform(const XMFLOAT4X4& entityTransform);
 	void RemoveInstances(const vector<InstanceData>& instancesToRemove);
 };

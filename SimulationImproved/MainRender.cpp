@@ -297,7 +297,7 @@ HRESULT MainRender::InitDXDevice()
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND  hwnd, UINT  umsg, WPARAM wparam, LPARAM  lparam);
 LRESULT CALLBACK WndProc(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam)
 {
-	//static int mouseX, mouseY; // Declare the variables outside the switch statement
+	static int mouseX, mouseY; // Declare the variables outside the switch statement
 
 
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
@@ -368,14 +368,10 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 	
 	SetCamera(camera);
 	
-	for (const auto& entity : entities)
-	{
-		
-	}
 	
-	for (const auto& entity : entities)
+	for ( auto& entity : entities)
 	{
-		for (const auto& shape : entity.Shapes())
+		for ( auto& shape : entity.Shapes())
 		{
 			
 			hr = Shader(shape);
@@ -395,6 +391,13 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 			
 			XMStoreFloat4x4(&cb1.mWorld, XMMatrixTranspose(XMLoadFloat4x4(&shape.Transform())));
 			XMStoreFloat4x4(&cb1.mWorldInverse, XMMatrixInverse(NULL, XMLoadFloat4x4(&cb1.mWorld)));
+
+
+
+			
+
+
+			// before this 
 			mImmediateContext->UpdateSubresource(mConstantBuffer, 0, nullptr, &cb1, 0, 0);
 
 		
@@ -445,7 +448,12 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());	
 	
+
+
+
+
 	//Everything should be called before this to render them 
+
 
 	mSwapChain->Present(1, 0);
 
@@ -529,11 +537,12 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 	{
 		if (mInstanceBuffers.count(shape.Name()) == 0)
 		{
+
 			ZeroMemory(&mBufferDesc, sizeof(mBufferDesc));
-			mBufferDesc.Usage = D3D11_USAGE_DYNAMIC;  // Buffer will be updated frequently
+			mBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 			mBufferDesc.ByteWidth = sizeof(InstanceData) * shape.Instances().size();
 			mBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			mBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;  // CPU will be writing to this buffer
+			mBufferDesc.CPUAccessFlags = 0;
 			D3D11_SUBRESOURCE_DATA InitData;
 			ZeroMemory(&InitData, sizeof(InitData));
 			InitData.pSysMem = &(shape.Instances()[0]);
@@ -553,42 +562,20 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 			const UINT stride = sizeof(InstanceData);
 			const UINT offset = 0;
 			mImmediateContext->IASetVertexBuffers(1, 1, &mInstanceBuffers[shape.Name()], &stride, &offset);
-			// Map the buffer, update it and unmap it
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-			// Disable GPU access to the vertex buffer data.
-			mImmediateContext->Map(mInstanceBuffers[shape.Name()], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-			// Update the vertex buffer here.
-			InstanceData* dataPtr = (InstanceData*)mappedResource.pData;
-
-			for (size_t i = 0; i < shape.Instances().size(); i++)
+			// Updating instance data with the isHit value.
+			std::vector<InstanceData> updatedInstances = shape.Instances();
+			for (auto& instance : updatedInstances)
 			{
-				dataPtr[i] = shape.Instances()[i];  // Copy the instance data
 
-				char buffer[200];
-				sprintf_s(buffer, "Instance ID: %d, isHit: %d\n", dataPtr[i].id, dataPtr[i].isHit);
-				OutputDebugStringA(buffer);
 
-				if (std::find(hitCubeIds.begin(), hitCubeIds.end(), dataPtr[i].id) != hitCubeIds.end())
-				{
-					// If the cube's ID is in the hitCubeIds list, mark it as hit and set the hit color
-					dataPtr[i].isHit = 1;
-					dataPtr[i].hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);  // Set to green, adjust to your preference
-				}
-				else
-				{
-					// Otherwise, mark it as not hit
-					dataPtr[i].isHit = 0;
-					// and reset the hitColor to the originalColor (or to whatever color you want when the cube is not hit)
-					dataPtr[i].hitColor = dataPtr[i].originalColor;
+				// Update the 'isHit' value of instance as per your game logic.
+				if (instance.isHit) {
+					instance.color = XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);  // Change to red for example.
 				}
 			}
 
-
-			// Reenable GPU access to the vertex buffer data.
-			mImmediateContext->Unmap(mInstanceBuffers[shape.Name()], 0);
+			mImmediateContext->UpdateSubresource(mInstanceBuffers[shape.Name()], 0, nullptr, updatedInstances.data(), 0, 0);
 		}
 	}
 
@@ -669,9 +656,11 @@ HRESULT MainRender::Shader(const VerticeShapes& shape)
 		{ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 44, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "INSTANCEPOSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 		{ "CUBEID", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 12, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // keep as it is
+		{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 76, D3D11_INPUT_PER_INSTANCE_DATA, 1 },
 		{ "ORIGINALCOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 28, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // replace colorToApply with originalColor
 		{ "HITCOLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 44, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
 		{ "ISHIT", 0, DXGI_FORMAT_R32_SINT, 1, 60, D3D11_INPUT_PER_INSTANCE_DATA, 1 }, // new field
+
 			};
 
 			// ...
@@ -1008,7 +997,7 @@ void MainRender::CreateCameras()
 	const float aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 
 	//camera 1 Position
-	Camera newCamera(true, XMFLOAT3(0.0f, 0.0f, 10), XMFLOAT3(0, XMConvertToRadians(190), 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
+	Camera newCamera(true, XMFLOAT3(0.0f, 0.0f, 10), XMFLOAT3(0, 0, 0), fov, aspectRatio, 0.1f, 100.0f, 1.0f, 10.0f);
 	cameras.push_back(newCamera);
 
 	
@@ -1063,26 +1052,32 @@ bool AABBIntersect(const AABB& box, const DirectX::XMVECTOR& rayOrigin, const Di
 
 void MainRender::CreateVoxels()
 {
-
+	
 	std::vector<InstanceData> instances;
 
 	int id = 0;  // Initialize cube ID counter
 
-	for (int y = 0; y < 2; y++) {
-		for (int z = 0; z < 5; z++) {
+	for (int y = 0; y < 5; y++) {
+		for (int z = 0; z < 1; z++) {
 			for (int x = 0; x < 5; x++) {
 				InstanceData instance;
-				instance.Pos = DirectX::XMFLOAT3(x * -2.5, y * 2.5, -20 - z * 3);
+				instance.Pos = DirectX::XMFLOAT3(x * 2.5, y * 2.5, 40 - z * 3);
 				instance.id = id;
+				instance.mass = 0;
+				//if (id % 2 == 0) {
+					// Set the original color to red for cubes with even id
+					instance.originalColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f); // Red
+				//}
+				//else {
+					// Set the original color to green for cubes with odd id
+				//	instance.originalColor = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+				//}
+				
 				instance.aabb.center = instance.Pos;
 				instance.aabb.extents = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
 				instance.isHit = 0;
 
-				// Set the original color to red for all cubes
-				instance.originalColor = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
-
-				// Set the hit color to black for all cubes
-				instance.hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); // Black
+				
 				
 
 				instances.push_back(instance);
@@ -1098,19 +1093,12 @@ void MainRender::CreateVoxels()
 
 
 	GameObject Voxels(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), "Voxels", 0.0f, 0.0f);
-	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
+	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(-5, -5, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
 	entities.push_back(Voxels);
 	terrain = &Voxels;
 }
 
 
-//this is for testing 
-				//if (id % 2 != 0) {  // Check if ID is odd
-				//	instance.colorToApply = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
-				//}
-				//else {
-				//	instance.colorToApply = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
-				//}
 
 
 
@@ -1139,8 +1127,7 @@ MainRender::MainRender(const int& width, const int& height) :
 	isExit(false),
 	isRocketLaunched(false),
 	isEngineOn(false),
-	inputManager(GetActiveWindow()) // Initialize the InputManager in the member initializer list with the active window handle
-
+	inputManager(GetActiveWindow()) 
 {
 }
 
@@ -1189,7 +1176,7 @@ void MainRender::Update(const float& dt)
 {
 
 	CheckInput(dt);
-
+	hitCubeIds.clear();
 	
 	POINT cursorPos = GetCursorPosition();
 	/*char buffer[100];
@@ -1232,12 +1219,13 @@ void MainRender::Update(const float& dt)
 		// Check if activeCam is not null
 		if (activeCam)
 		{
+
 			// Camera's view and projection matrices
 			DirectX::XMFLOAT4X4 viewMatrix = activeCam->View();
 			DirectX::XMFLOAT4X4 projMatrix = activeCam->Projection();
 
 			// Extract the forward vector from the view matrix
-			DirectX::XMVECTOR mouseRayDir = DirectX::XMVectorSet(viewMatrix._31, viewMatrix._32, viewMatrix._33, 0.0f);
+			DirectX::XMVECTOR mouseRayDir = DirectX::XMVectorSet(-viewMatrix._31, -viewMatrix._32, -viewMatrix._33, 0.0f);
 
 			// Normalize the forward vector (if not already normalized)
 			mouseRayDir = DirectX::XMVector3Normalize(mouseRayDir);
@@ -1274,30 +1262,22 @@ void MainRender::Update(const float& dt)
 						if (AABBIntersect(instance.aabb, mouseRayOrigin, mouseRayDir))
 						{
 							char buffer[100];
-							sprintf_s(buffer, "Raycast hit cube ID: %d\n", instance.id);
+							sprintf_s(buffer, "Raycast Has hit cube with ID: %d\n", instance.id);
 							OutputDebugStringA(buffer);
 							// Here's the important part:
 							// Update the instance data to mark this cube as hit
+
+							instance.originalColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f); // Set changeColor.x to 1
+							 // This sets the color to green, adjust to desire
+
 							instance.isHit = 1;
-							instance.hitColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);  // This sets the hitColor to green, adjust to desired color
-
-
-							//// Map the buffer, update it and unmap it
-							//D3D11_MAPPED_SUBRESOURCE mappedResource;
-							//ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
-
-							//// Disable GPU access to the vertex buffer data.
-							//mImmediateContext->Map(mInstanceBuffers[shape.Name()], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-							//// Update the vertex buffer here.
-							//InstanceData* dataPtr = (InstanceData*)mappedResource.pData;
-
-							//// Copy the updated instance data
-							//dataPtr[i] = instance;
-
-							//// Reenable GPU access to the vertex buffer data.
-							//mImmediateContext->Unmap(mInstanceBuffers[shape.Name()], 0);
+							instance.mass = 1;
+							instance.hitColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);  // This sets the hitColor to green, adjust to desired color
+							
+							
+							sprintf_s(buffer, "cube mass = %d, \n", instance.mass);
+							OutputDebugStringA(buffer);
+							
 
 							
 							// TODO: Update the instance buffer on the GPU to reflect these changes.
@@ -1323,9 +1303,7 @@ void MainRender::Update(const float& dt)
 		OutputDebugStringA("Left mouse button released.\n");
 	}
 
-	// Get the mouse position from the InputManager
-	int mouseX = inputManager.GetMouseX();
-	int mouseY = inputManager.GetMouseY();
+
 
 
 	

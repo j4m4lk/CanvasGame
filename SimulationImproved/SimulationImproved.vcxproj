@@ -137,6 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ImGuiManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="MainRender.cpp" />
     <ClCompile Include="GameObjects.cpp" />
@@ -190,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\Downloads\Keyboard.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MainRender.h" />
     <ClInclude Include="GameObjects.h" />

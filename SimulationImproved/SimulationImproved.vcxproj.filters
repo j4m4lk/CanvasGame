@@ -52,6 +52,9 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>SourceFiles</Filter>
     </ClCompile>
+    <ClCompile Include="ImGuiManager.cpp">
+      <Filter>SourceFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="InstancedShader.fx">
@@ -108,6 +111,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\..\Downloads\Keyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

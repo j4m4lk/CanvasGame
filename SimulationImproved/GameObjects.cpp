@@ -244,19 +244,25 @@ InstanceData& GameObject::GetInstance(const std::string& shapeName, size_t index
 		throw std::out_of_range("Shape name not found");
 	}
 
-	// Get the instances for this shape
-	std::vector<InstanceData> shapeInstances = it->Instances();
-
 	// Check if index is within bounds of the instances vector
-	if (index >= shapeInstances.size()) {
+	if (index >= it->InstanceCount()) {
 		// If index is out of bounds, throw an exception or handle the error
 		throw std::out_of_range("Index out of range for shape instances");
 	}
 
 	// Return the InstanceData at the given index
-	return shapeInstances[index];
+	return it->GetInstance(index);
 }
 
+
+
+pair<int, float> GameObject::GetCubeIdAndMass(const std::string& shapeName, size_t index) {
+	// Get the instance data for the cube at the given index
+	InstanceData& instance = GetInstance(shapeName, index);
+
+	// Return the ID and mass of the cube
+	return { instance.id, instance.mass };
+}
 
 bool operator==(const GameObject& a, const GameObject& b)
 {

@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <directxmath.h>
+#include <utility>
+
 
 using namespace DirectX;
 class GameObject
@@ -63,6 +65,7 @@ public:
 	
 	std::vector<VerticeShapes>& GetShapes();
 	InstanceData& GameObject::GetInstance(const std::string& shapeName, size_t index);
+	pair<int, float> GetCubeIdAndMass(const std::string& shapeName, size_t index);
 
 
 };

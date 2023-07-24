@@ -132,14 +132,14 @@ const string& VerticeShapes::Name() const
 	return name;
 }
 
-InstanceData& VerticeShapes::GetInstance(size_t index)
-{
-	if (index >= mInstanceData.size())
-	{
-		throw std::out_of_range("Index out of range in GetInstance");
-	}
-
-	return mInstanceData[index];
+InstanceData& VerticeShapes::GetInstance(size_t index) {
+    if (index >= mInstanceData.size()) {
+        throw std::out_of_range("Index out of range for instances");
+    }
+    return mInstanceData[index];
+}
+std::size_t VerticeShapes::InstanceCount() const {
+	return mInstanceData.size();
 }
 
 
@@ -164,4 +164,22 @@ void VerticeShapes::RemoveInstances(const vector<InstanceData>& instancesToRemov
 	{
 		mInstanceData.erase(remove(mInstanceData.begin(), mInstanceData.end(), instance), mInstanceData.end());
 	}
+}
+
+int VerticeShapes::GetCubeId(size_t index)
+{
+	if (index >= mInstanceData.size())
+	{
+		throw out_of_range("Index out of range.");
+	}
+	return mInstanceData[index].id;
+}
+
+float VerticeShapes::GetCubeMass(size_t index)
+{
+	if (index >= mInstanceData.size())
+	{
+		throw out_of_range("Index out of range.");
+	}
+	return mInstanceData[index].mass;
 }

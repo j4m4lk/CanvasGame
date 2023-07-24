@@ -30,11 +30,14 @@ struct ConstantBuffer
 	XMFLOAT4X4 mProjection;
 
 	XMFLOAT4 vCameraPos;
-	XMFLOAT4 colorToApply; 
+	XMFLOAT4 colorToApply;
+	XMFLOAT4 changeColor;
+	XMFLOAT4 originalColor;
 	float numOfLights;
 	float time;
 	XMFLOAT2 padding;
 };
+
 
 class MainRender
 {
@@ -130,7 +133,11 @@ public:
 	MainRender& operator=(const MainRender&) = delete;
 	MainRender(const MainRender&) = delete;
 
-	
+	bool isOddGreen = true;
+
+	const XMFLOAT4 colorEven = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f); // Red
+	const XMFLOAT4 colorOdd = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f); // Green
+
 
 	void setReset(bool _st) 
 	{
