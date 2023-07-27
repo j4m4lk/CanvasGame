@@ -5,7 +5,8 @@
 using namespace DirectX;
 using namespace std;
 
-
+HINSTANCE g_hInst = nullptr;
+HWND      g_hWnd = nullptr;
 
 MainRender::MainRender() :
 	mWidth(0),
@@ -276,15 +277,9 @@ HRESULT MainRender::InitDXDevice()
 	if (FAILED(hr))
 		return hr;
 
+	m_imguiManager = new ImGuiManager(mWnd, mD3dDevice, mImmediateContext);
 
-	//initialize imgui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	ImGui_ImplWin32_Init(mWnd);
-	ImGui_ImplDX11_Init(mD3dDevice, mImmediateContext);
-	ImGui::StyleColorsDark();
-	// imgui 
+	
 
 	return static_cast<HRESULT>(0L);
 }
@@ -418,41 +413,13 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 
 
 	
-	ImGui_ImplDX11_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();	
-	ImGui::Begin("Missle Somulation");
-	
-	//Make keys and then assign them the values for the fucntions
-	ImGui::Text(" Simulation Controls ");
-	if (ImGui::Button("Reset Scene")) {
-		Resetclicked = true;
-	}
-	//ImGui::Text(" Time scale : " + to_string(timescale).c_str());
-	if (ImGui::Button("cam1")) {
-	//	cam = 1;
-	}
-	if (ImGui::Button("cam2")) {
-	//	cam = 2;
-	}
-	if (ImGui::Button("cam3")) {
-		//activeCam = &cameras[2];
-	}
-	if (ImGui::Button("cam4")) {
-		//activeCam = &cameras[3];
-	}
-
-	ImGui::Text("Timescale") ;
-
-	ImGui::End();
-	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());	
 	
 
 
 
 
 	//Everything should be called before this to render them 
+	m_imguiManager->RenderUI();
 
 
 	mSwapChain->Present(1, 0);
@@ -1303,7 +1270,7 @@ void MainRender::Update(const float& dt)
 		OutputDebugStringA("Left mouse button released.\n");
 	}
 
-
+	m_imguiManager->BeginFrame();
 
 
 	

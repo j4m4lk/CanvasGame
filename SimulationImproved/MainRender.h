@@ -8,19 +8,18 @@
 #include "GameObjects.h"
 #include "VerticeShapes.h"
 #include "Camera.h"
-
+#include "ImGuiManager.h"
 #include <Keyboard.h>
-#include "imgui\\imgui.h"
-#include "imgui\\imgui_impl_dx11.h"
-#include "imgui\\imgui_impl_win32.h"
+
 #include <windows.h>
 #include <chrono>
 #include "resource.h"
 #include <Windowsx.h>
 #include "InputManager.h"
 
-HINSTANCE               g_hInst = nullptr;
-HWND                    g_hWnd = nullptr;
+extern HINSTANCE g_hInst;
+
+extern HWND       g_hWnd; 
 
 struct ConstantBuffer
 {
@@ -114,7 +113,9 @@ private:
 	
 	
 	void SetEntityPointers();
-	
+
+
+	ImGuiManager* m_imguiManager;
 
 public:
 	int cam = 0;
