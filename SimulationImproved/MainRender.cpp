@@ -14,51 +14,11 @@ MainRender::MainRender() :
 	Resetclicked(false),
 	inputManager(GetActiveWindow()) // Initialize the InputManager in the member initializer list with the active window handle
 {
-	char buffer[100];
-	sprintf_s(buffer, "constructor calling.\n");
-	OutputDebugStringA(buffer);
+	
 
-	if (!netManager.Initialize()) {
-		std::cerr << "NetworkManager failed to initialize." << std::endl;
-	}
-	else
-	{
-		char buffer[100];
-		sprintf_s(buffer, "NetworkManager initialize.\n");
-		OutputDebugStringA(buffer);
-	}
+	
+}
 
-	if (!InitNetworkManager()) {
-		std::cerr << "Failed to establish a network connection." << std::endl;
-	}
-	else {
-		char buffer[100];
-		sprintf_s(buffer, "succeeded to establish a network connection.\n");
-		OutputDebugStringA(buffer);
-	}
-}
-bool MainRender::InitNetworkManager() {
-	if (!netManager.Connect()) {
-		std::cerr << "NetworkManager failed to connect to server." << std::endl;
-		if (!netManager.InitServer()) {
-			std::cerr << "NetworkManager failed to initialize server." << std::endl;
-			return false;
-		}
-		else {
-			
-			char buffer[100];
-			sprintf_s(buffer, "Server initialized successfully.\n");
-			OutputDebugStringA(buffer);
-		}
-	}
-	else {
-		
-		char buffer[100];
-		sprintf_s(buffer, "connected to server successfully.\n");
-		OutputDebugStringA(buffer);
-	}
-	return true;
-}
 
 
 MainRender::~MainRender()
@@ -325,11 +285,7 @@ HRESULT MainRender::InitDXDevice()
 
 	m_imguiManager = new ImGuiManager(mWnd, mD3dDevice, mImmediateContext);
 
-	if (!netManager.Initialize())
-	{
-		OutputDebugStringA("Successfully connected to server.\n");
-		return -1;
-	}
+	
 
 	
 
@@ -827,6 +783,35 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 
 	
 	MainRender renderer;
+
+	//Should initilize here 
+
+	 // Initialize the Network Manager
+	//NetworkManager networkManager;
+
+	//// Check if you want to start as a server or client. Let's assume server for now
+	//bool isServer = true;  // Set this to false if you want to start as a client
+	//std::string serverIP = "127.0.0.1";  // Change this to the server's IP if you're a client
+	//int serverPort = 54000;  // Change this to the server's port
+
+	//if (!networkManager.Initialize(isServer, serverIP, serverPort)) {
+	//	std::cout << "NetworkManager initialization failed." << std::endl;
+	//	return 0;
+	//}
+
+	//if (isServer) {
+	//	if (!networkManager.AcceptConnection()) {
+	//		std::cout << "Server failed to accept a client connection." << std::endl;
+	//		return 0;
+	//	}
+	//}
+	//else {
+	//	if (!networkManager.ConnectToServer()) {
+	//		std::cout << "Client failed to connect to the server." << std::endl;
+	//		return 0;
+	//	}
+	//}
+	
 	renderer.SetWindow(g_hWnd);
 
 	//Initisialises DirectX device, and cleans up device if there's a failure
@@ -886,6 +871,7 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 
 	//Cleanup device on exit
 	renderer.CleanUpDevice();
+	//networkManager.Disconnect();
 
 	return static_cast<int>(msg.wParam);
 }
