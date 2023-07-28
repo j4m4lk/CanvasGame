@@ -14,6 +14,50 @@ MainRender::MainRender() :
 	Resetclicked(false),
 	inputManager(GetActiveWindow()) // Initialize the InputManager in the member initializer list with the active window handle
 {
+	char buffer[100];
+	sprintf_s(buffer, "constructor calling.\n");
+	OutputDebugStringA(buffer);
+
+	if (!netManager.Initialize()) {
+		std::cerr << "NetworkManager failed to initialize." << std::endl;
+	}
+	else
+	{
+		char buffer[100];
+		sprintf_s(buffer, "NetworkManager initialize.\n");
+		OutputDebugStringA(buffer);
+	}
+
+	if (!InitNetworkManager()) {
+		std::cerr << "Failed to establish a network connection." << std::endl;
+	}
+	else {
+		char buffer[100];
+		sprintf_s(buffer, "succeeded to establish a network connection.\n");
+		OutputDebugStringA(buffer);
+	}
+}
+bool MainRender::InitNetworkManager() {
+	if (!netManager.Connect()) {
+		std::cerr << "NetworkManager failed to connect to server." << std::endl;
+		if (!netManager.InitServer()) {
+			std::cerr << "NetworkManager failed to initialize server." << std::endl;
+			return false;
+		}
+		else {
+			
+			char buffer[100];
+			sprintf_s(buffer, "Server initialized successfully.\n");
+			OutputDebugStringA(buffer);
+		}
+	}
+	else {
+		
+		char buffer[100];
+		sprintf_s(buffer, "connected to server successfully.\n");
+		OutputDebugStringA(buffer);
+	}
+	return true;
 }
 
 
@@ -59,6 +103,8 @@ HRESULT MainRender::CompileShaderFromFile(const WCHAR* const szFileName, const L
 	if (pErrorBlob) pErrorBlob->Release();
 
 	return static_cast<HRESULT>(0L);
+
+	
 }
 
 
@@ -279,6 +325,12 @@ HRESULT MainRender::InitDXDevice()
 
 	m_imguiManager = new ImGuiManager(mWnd, mD3dDevice, mImmediateContext);
 
+	if (!netManager.Initialize())
+	{
+		OutputDebugStringA("Successfully connected to server.\n");
+		return -1;
+	}
+
 	
 
 	return static_cast<HRESULT>(0L);
@@ -420,6 +472,7 @@ HRESULT MainRender::Render(const vector<GameObject>& entities, const Camera* con
 
 	//Everything should be called before this to render them 
 	m_imguiManager->RenderUI();
+
 
 
 	mSwapChain->Present(1, 0);
@@ -767,6 +820,8 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
+
+
 	if (FAILED(InitWindow(hInstance, nCmdShow)))
 		return 0;
 
@@ -1044,7 +1099,9 @@ void MainRender::CreateVoxels()
 				instance.aabb.extents = DirectX::XMFLOAT3(1.0f, 1.0f, 1.0f);
 				instance.isHit = 0;
 
-				
+				/*char buffer[100];
+				sprintf_s(buffer, "Creating voxel cube with ID: %d\n", id);
+				OutputDebugStringA(buffer);*/
 				
 
 				instances.push_back(instance);
@@ -1271,6 +1328,10 @@ void MainRender::Update(const float& dt)
 	}
 
 	m_imguiManager->BeginFrame();
+	 
+	
+	
+
 
 
 	

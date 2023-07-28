@@ -1,3 +1,4 @@
+#include "NetworkManager.h"
 #include <vector>
 #include <map>
 #include <d3d11_1.h>
@@ -96,6 +97,7 @@ private:
 
 	InputManager inputManager; // Declare the InputManager as a member variable
 
+
 	
 	unique_ptr<Keyboard> keyboard{};
 
@@ -116,6 +118,10 @@ private:
 
 
 	ImGuiManager* m_imguiManager;
+	NetworkManager netManager;
+
+
+	bool InitNetworkManager();
 
 public:
 	int cam = 0;
