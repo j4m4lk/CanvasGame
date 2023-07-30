@@ -38,6 +38,13 @@ struct ConstantBuffer
 	XMFLOAT2 padding;
 };
 
+struct CubeData
+{
+	int id;
+	bool isHit;
+};
+std::vector<CubeData> hitCubes;
+
 
 class MainRender
 {
@@ -165,7 +172,7 @@ public:
 	void camsetting(int ch);
 
 	bool IsRayIntersectingAABB(const DirectX::XMVECTOR& rayOrigin, const DirectX::XMVECTOR& rayDir, const AABB& aabb);
-
+	NetworkManager networkManager;
 	
 
 

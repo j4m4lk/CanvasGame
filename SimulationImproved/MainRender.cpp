@@ -784,33 +784,33 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 	
 	MainRender renderer;
 
-	//Should initilize here 
+	
 
-	 // Initialize the Network Manager
-	//NetworkManager networkManager;
 
-	//// Check if you want to start as a server or client. Let's assume server for now
-	//bool isServer = true;  // Set this to false if you want to start as a client
-	//std::string serverIP = "127.0.0.1";  // Change this to the server's IP if you're a client
-	//int serverPort = 54000;  // Change this to the server's port
+	// Check if you want to start as a server or client. Let's assume server for now
+	bool isServer = true;  // Set this to false if you want to start as a client
+	std::string serverIP = "127.0.0.1";  // Change this to the server's IP if you're a client
+	int serverPort = 54000;  // Change this to the server's port
 
-	//if (!networkManager.Initialize(isServer, serverIP, serverPort)) {
-	//	std::cout << "NetworkManager initialization failed." << std::endl;
-	//	return 0;
-	//}
+	if (!renderer.networkManager.Initialize(isServer, serverIP, serverPort)) {
+		std::cout << "NetworkManager initialization failed." << std::endl;
+		return 0;
+	}
 
-	//if (isServer) {
-	//	if (!networkManager.AcceptConnection()) {
-	//		std::cout << "Server failed to accept a client connection." << std::endl;
-	//		return 0;
-	//	}
-	//}
-	//else {
-	//	if (!networkManager.ConnectToServer()) {
-	//		std::cout << "Client failed to connect to the server." << std::endl;
-	//		return 0;
-	//	}
-	//}
+	if (isServer) {
+		if (!renderer.networkManager.AcceptConnection()) {
+			std::cout << "Server failed to accept a client connection." << std::endl;
+			return 0;
+		}
+	}
+	else {
+		if (!renderer.networkManager.ConnectToServer()) {
+			std::cout << "Client failed to connect to the server." << std::endl;
+			return 0;
+		}
+		//uncomment on client side 
+		//renderer.networkManager.SendHello();
+	}
 	
 	renderer.SetWindow(g_hWnd);
 
@@ -871,7 +871,7 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 
 	//Cleanup device on exit
 	renderer.CleanUpDevice();
-	//networkManager.Disconnect();
+	renderer.networkManager.Disconnect();
 
 	return static_cast<int>(msg.wParam);
 }
@@ -1283,12 +1283,16 @@ void MainRender::Update(const float& dt)
 							instance.isHit = 1;
 							instance.mass = 1;
 							instance.hitColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);  // This sets the hitColor to green, adjust to desired color
-							
+							CubeData cubeData;
+							cubeData.id = instance.id;
+							cubeData.isHit = true;
+							hitCubes.push_back(cubeData);
 							
 							sprintf_s(buffer, "cube mass = %d, \n", instance.mass);
 							OutputDebugStringA(buffer);
 							
-
+							sprintf_s(buffer, "ishit = %d, \n", instance.isHit);
+							OutputDebugStringA(buffer);
 							
 							// TODO: Update the instance buffer on the GPU to reflect these changes.
 
@@ -1311,8 +1315,12 @@ void MainRender::Update(const float& dt)
 	{
 		// Left mouse button was released
 		OutputDebugStringA("Left mouse button released.\n");
+		for (const CubeData& cubeData : hitCubes) {
+			std::string message = std::to_string(cubeData.id) + ":" + (cubeData.isHit ? "1" : "0");
+			networkManager.SendData(message);
+		}
 	}
-
+	hitCubes.clear();
 	m_imguiManager->BeginFrame();
 	 
 	
@@ -1322,6 +1330,8 @@ void MainRender::Update(const float& dt)
 
 	
 }
+
+
 
 //
 
