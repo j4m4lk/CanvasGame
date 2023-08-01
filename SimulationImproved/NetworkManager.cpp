@@ -149,8 +149,17 @@ std::string NetworkManager::ListenForMessages() {
         OutputDebugStringA(debugMsg.c_str());
         if (receivedData == "HELLO") {
             SendData("ACK");
-            sprintf_s(buffer, "Hellow recieved  %d\n");
+            sprintf_s(buffer, "Hellow recieved \n");
             OutputDebugStringA(buffer);
+        }
+        else {
+            //// Handle CubeData messages
+            //CubeData cubeData;
+            //if (ParseCubeDataMessage(receivedData, cubeData)) {
+            //    std::lock_guard<std::mutex> lock(cubeDataMutex); 
+            //    receivedCubeData.push_back(cubeData);
+            //
+            //}
         }
         return receivedData;
     }
@@ -176,4 +185,66 @@ void NetworkManager::StopListeningThread() {
         listeningThread.join();
     }
 }
+
+// Helper function to serialize the data.
+std::string NetworkManager::SerializeCubeData(int id, bool isHit) {
+    std::stringstream ss;
+    ss << "CubeData:" << id << ":" << isHit;
+    return ss.str();
+}
+
+// Send cube data over the network.
+bool NetworkManager::SendCubeData(int id, bool isHit) {
+    std::string data = SerializeCubeData(id, isHit);
+    return SendData(data);
+}
+
+// Parse received data into cube ID and isHit status.
+std::pair<int, bool> NetworkManager::ParseCubeData(const std::string& data) {
+    std::stringstream ss(data);
+    std::string item;
+    std::vector<std::string> tokens;
+
+    while (std::getline(ss, item, ':')) {
+        tokens.push_back(item);
+    }
+
+    if (tokens.size() == 3 && tokens[0] == "CubeData") {
+        int id = std::stoi(tokens[1]);
+        bool isHit = (tokens[2] == "1");
+        return std::make_pair(id, isHit);
+    }
+
+    return std::make_pair(-1, false);  // Indicate an error.
+}
+
+// Receive cube data over the network.
+std::pair<int, bool> NetworkManager::ReceiveCubeData() {
+    std::string receivedData = ListenForMessages();
+
+    if (!receivedData.empty()) {
+        return ParseCubeData(receivedData);
+    }
+
+    return std::make_pair(-1, false);  // Indicate an error.
+}
+std::string NetworkManager::FormatCubeDataMessage(const CubeData& cubeData) {
+    std::stringstream ss;
+    ss << cubeData.id << ":" << (cubeData.isHit ? "1" : "0");
+    return ss.str();
+}
+bool NetworkManager::ParseCubeDataMessage(const std::string& message, CubeData& cubeData) {
+    std::stringstream ss(message);
+    std::string item;
+    std::getline(ss, item, ':');
+    if (ss.fail())
+        return false;
+    cubeData.id = std::stoi(item);
+    std::getline(ss, item);
+    if (ss.fail())
+        return false;
+    cubeData.isHit = (item == "1");
+    return true;
+}
+
 

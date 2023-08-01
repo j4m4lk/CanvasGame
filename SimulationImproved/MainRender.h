@@ -17,6 +17,8 @@
 #include "resource.h"
 #include <Windowsx.h>
 #include "InputManager.h"
+#include "CubeData.h"
+
 
 extern HINSTANCE g_hInst;
 
@@ -38,11 +40,8 @@ struct ConstantBuffer
 	XMFLOAT2 padding;
 };
 
-struct CubeData
-{
-	int id;
-	bool isHit;
-};
+
+
 std::vector<CubeData> hitCubes;
 
 
@@ -128,10 +127,14 @@ private:
 	NetworkManager netManager;
 
 
+
 	bool InitNetworkManager();
 
 public:
 	int cam = 0;
+
+
+
 	MainRender();
 	MainRender(const int& width, const int& height);
 	~MainRender();
@@ -173,7 +176,8 @@ public:
 
 	bool IsRayIntersectingAABB(const DirectX::XMVECTOR& rayOrigin, const DirectX::XMVECTOR& rayDir, const AABB& aabb);
 	NetworkManager networkManager;
-	
+	void UpdateCubes(NetworkManager& networkManager);
+
 
 
 };

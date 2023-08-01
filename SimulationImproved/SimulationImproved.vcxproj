@@ -196,6 +196,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\Downloads\Keyboard.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CubeData.h" />
     <ClInclude Include="ImGuiManager.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MainRender.h" />
@@ -214,6 +215,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="ClassDiagram1.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

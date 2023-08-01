@@ -1,4 +1,5 @@
 #include "ImGuiManager.h"
+#include "CubeData.h"
 
 
 ImGuiManager::ImGuiManager(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* context)
@@ -29,22 +30,13 @@ void ImGuiManager::RenderUI()
 	
 	////Make keys and then assign them the values for the fucntions
 	ImGui::Text(" Canvas Painter  ");
-	if (ImGui::Button("Reset Scene")) {
-		//Resetclicked = true;
-	}
-	//ImGui::Text(" Time scale : " + to_string(timescale).c_str());
-	if (ImGui::Button("cam1")) {
-	//	cam = 1;
-	}
-	if (ImGui::Button("cam2")) {
-	//	cam = 2;
-	}
-	if (ImGui::Button("cam3")) {
-		//activeCam = &cameras[2];
-	}
-	if (ImGui::Button("cam4")) {
-		//activeCam = &cameras[3];
-	}
+     ImGui::Text("Number of cubes mass : ");
+     ImGui::Text("Number of cubes mass taken : ");
+     ImGui::Text("Network Stats");
+     ImGui::Text("Total players : ");
+     ImGui::Text("Player No =  ");
+    // ImGui::Text(("Number of players: " + std::to_string(network.GetConnectedPlayers())).c_str());
+   
 
 	ImGui::Text("Timescale") ;
 

@@ -5,6 +5,16 @@
 #include <iostream>
 #include <thread>
 #include <atomic>
+#include <sstream> 
+#include <vector> 
+#include <string>   
+#include "CubeData.h"
+#include <mutex>
+
+
+
+
+
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -24,11 +34,16 @@ public:
     bool SendHello();
     std::string ListenForMessages();
 
-    // Starts the background thread that listens for messages from the server.
-    void StartListeningThread();
-
-    // Stops the background thread that listens for messages from the server.
+    void StartListeningThread();   
     void StopListeningThread();
+    bool SendCubeData(int id, bool isHit);
+    std::pair<int, bool> ReceiveCubeData();
+    std::string FormatCubeDataMessage(const CubeData& cubeData);
+    bool ParseCubeDataMessage(const std::string& message, CubeData& cubeData);
+
+
+    std::vector<CubeData> receivedCubeData; // Shared data
+    std::mutex cubeDataMutex;               // Mutex to protect shared data
 
 private:
     WSADATA wsaData;
@@ -39,8 +54,10 @@ private:
     bool isServer;
     bool running;
     std::thread listeningThread;
-    std::unique_ptr<std::thread> listenerThread; // For managing the thread object
-    std::atomic<bool> shouldStopListening = false; // Flag to control when the thread should stop
-    //...
+    std::unique_ptr<std::thread> listenerThread; 
+    std::atomic<bool> shouldStopListening = false; 
+    std::string SerializeCubeData(int id, bool isHit);
+    std::pair<int, bool> ParseCubeData(const std::string& data);
+
 
 };

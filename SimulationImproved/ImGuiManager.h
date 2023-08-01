@@ -6,6 +6,9 @@
 #include "imgui\\imgui_impl_dx11.h"
 #include "imgui\\imgui_impl_win32.h"
 #include <windows.h>
+#include <string>
+
+
 
 class ImGuiManager
 {
@@ -14,6 +17,7 @@ public:
     void BeginFrame();
     void RenderUI();
     ~ImGuiManager();
+
 
 private:
     HWND m_hwnd;

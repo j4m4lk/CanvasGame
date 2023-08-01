@@ -548,6 +548,8 @@ HRESULT MainRender::VertexIndex(const VerticeShapes& shape)
 				// Update the 'isHit' value of instance as per your game logic.
 				if (instance.isHit) {
 					instance.color = XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f);  // Change to red for example.
+
+
 				}
 			}
 
@@ -787,30 +789,30 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 	
 
 
-	// Check if you want to start as a server or client. Let's assume server for now
-	bool isServer = true;  // Set this to false if you want to start as a client
-	std::string serverIP = "127.0.0.1";  // Change this to the server's IP if you're a client
-	int serverPort = 54000;  // Change this to the server's port
+	
+	//bool isServer = true;  
+	//std::string serverIP = "127.0.0.1";  
+	//int serverPort = 54000;  
 
-	if (!renderer.networkManager.Initialize(isServer, serverIP, serverPort)) {
-		std::cout << "NetworkManager initialization failed." << std::endl;
-		return 0;
-	}
+	//if (!renderer.networkManager.Initialize(isServer, serverIP, serverPort)) {
+	//	std::cout << "NetworkManager initialization failed." << std::endl;
+	//	return 0;
+	//}
 
-	if (isServer) {
-		if (!renderer.networkManager.AcceptConnection()) {
-			std::cout << "Server failed to accept a client connection." << std::endl;
-			return 0;
-		}
-	}
-	else {
-		if (!renderer.networkManager.ConnectToServer()) {
-			std::cout << "Client failed to connect to the server." << std::endl;
-			return 0;
-		}
-		//uncomment on client side 
-		//renderer.networkManager.SendHello();
-	}
+	//if (isServer) {
+	//	if (!renderer.networkManager.AcceptConnection()) {
+	//		std::cout << "Server failed to accept a client connection." << std::endl;
+	//		return 0;
+	//	}
+	//}
+	//else {
+	//	if (!renderer.networkManager.ConnectToServer()) {
+	//		std::cout << "Client failed to connect to the server." << std::endl;
+	//		return 0;
+	//	}
+	//	//uncomment on client side 
+	//	//renderer.networkManager.SendHello();
+	//}
 	
 	renderer.SetWindow(g_hWnd);
 
@@ -871,7 +873,7 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 
 	//Cleanup device on exit
 	renderer.CleanUpDevice();
-	renderer.networkManager.Disconnect();
+	//renderer.networkManager.Disconnect();
 
 	return static_cast<int>(msg.wParam);
 }
@@ -1065,13 +1067,14 @@ void MainRender::CreateVoxels()
 
 	int id = 0;  // Initialize cube ID counter
 
-	for (int y = 0; y < 5; y++) {
+	for (int y = 0; y < 30; y++) {
 		for (int z = 0; z < 1; z++) {
-			for (int x = 0; x < 5; x++) {
+			for (int x = 0; x < 30; x++) {
 				InstanceData instance;
-				instance.Pos = DirectX::XMFLOAT3(x * 2.5, y * 2.5, 40 - z * 3);
+				instance.Pos = DirectX::XMFLOAT3(x * 2, y * 2, 40 - z * 3);
 				instance.id = id;
 				instance.mass = 0;
+		
 				//if (id % 2 == 0) {
 					// Set the original color to red for cubes with even id
 					instance.originalColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f); // Red
@@ -1102,7 +1105,7 @@ void MainRender::CreateVoxels()
 
 
 
-	GameObject Voxels(XMFLOAT3(0, 0, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), "Voxels", 0.0f, 0.0f);
+	GameObject Voxels(XMFLOAT3(-20,-30, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), "Voxels", 0.0f, 0.0f);
 	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(-5, -5, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
 	entities.push_back(Voxels);
 	terrain = &Voxels;
@@ -1315,22 +1318,49 @@ void MainRender::Update(const float& dt)
 	{
 		// Left mouse button was released
 		OutputDebugStringA("Left mouse button released.\n");
-		for (const CubeData& cubeData : hitCubes) {
-			std::string message = std::to_string(cubeData.id) + ":" + (cubeData.isHit ? "1" : "0");
+
+		/*for (const CubeData& cubeData : hitCubes) {
+			std::string message = networkManager.FormatCubeDataMessage(cubeData);
 			networkManager.SendData(message);
-		}
+		}*/
+
+
 	}
+	//UpdateCubes(networkManager);
 	hitCubes.clear();
 	m_imguiManager->BeginFrame();
 	 
-	
+
 	
 
 
 
 	
 }
-
+//void MainRender::UpdateCubes(NetworkManager& networkManager) {
+//	std::lock_guard<std::mutex> lock(networkManager.cubeDataMutex);
+//	for (const CubeData& cubeData : networkManager.receivedCubeData) {
+//		
+//		for (auto& voxel : entities) {
+//			
+//			for (auto& shape : voxel.GetShapes()) {
+//				
+//				for (auto& instance : shape.Instances()) {
+//					// If the instance's ID matches the received cube data's ID
+//					if (instance.id == cubeData.id) {
+//						// Update the instance's isHit status
+//					
+//
+//						instance.isHit = cubeData.isHit ? 1 : 0;
+//						
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+//	networkManager.receivedCubeData.clear(); // remove processed data
+//}
 
 
 //
