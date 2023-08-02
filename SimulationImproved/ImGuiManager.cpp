@@ -1,5 +1,7 @@
 #include "ImGuiManager.h"
 #include "CubeData.h"
+#include "NetworkStats.h"
+
 
 
 ImGuiManager::ImGuiManager(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* context)
@@ -24,21 +26,23 @@ void ImGuiManager::BeginFrame()
 
 void ImGuiManager::RenderUI()
 {
-    ImGui::Begin("Missle Simulation");
+    ImGui::Begin("Canvas Painter ");
 
 	
 	
 	////Make keys and then assign them the values for the fucntions
-	ImGui::Text(" Canvas Painter  ");
-     ImGui::Text("Number of cubes mass : ");
-     ImGui::Text("Number of cubes mass taken : ");
+	ImGui::Text(" Cube data ");
+    ImGui::Text("Number of cubesmass : ");
      ImGui::Text("Network Stats");
-     ImGui::Text("Total players : ");
-     ImGui::Text("Player No =  ");
+     ImGui::Text(("Total players : " + std::to_string(totalPlayers)).c_str());
+     ImGui::Text(("Server Connected: " + std::string(serverConnected ? "Yes" : "No")).c_str());
+     ImGui::Text(("Client Connected: " + std::string(clientConnected ? "Yes" : "No")).c_str());
+    
+
     // ImGui::Text(("Number of players: " + std::to_string(network.GetConnectedPlayers())).c_str());
    
 
-	ImGui::Text("Timescale") ;
+	
 
 	
     ImGui::End();

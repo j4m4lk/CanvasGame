@@ -1,5 +1,6 @@
 #include "MainRender.h"
 #include <Windows.h>
+#include "NetworkStats.h"
 
 
 using namespace DirectX;
@@ -12,7 +13,7 @@ MainRender::MainRender() :
 	mWidth(0),
 	mHeight(0),
 	Resetclicked(false),
-	inputManager(GetActiveWindow()) // Initialize the InputManager in the member initializer list with the active window handle
+	inputManager(GetActiveWindow()) 
 {
 	
 
@@ -23,6 +24,9 @@ MainRender::MainRender() :
 
 MainRender::~MainRender()
 {
+	networkManager.StopListeningThread();
+	//renderThreadManager.StopThread();
+
 }
 
 
@@ -791,8 +795,28 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 
 	
 	//bool isServer = true;  
-	//std::string serverIP = "127.0.0.1";  
-	//int serverPort = 54000;  
+	///*std::string serverIP = "127.0.0.1";  
+	//int serverPort = 54000;  */
+
+	//std::string serverIP;
+	//int serverPort;
+
+	//std::ifstream config_file("config.txt");
+	//if (config_file.is_open())
+	//{
+	//	std::getline(config_file, serverIP); // Get IP address
+
+	//	std::string port_string;
+	//	std::getline(config_file, port_string); // Get port as string
+	//	serverPort = std::stoi(port_string); // Convert string to int
+
+	//	config_file.close();
+	//}
+	//else
+	//{
+	//	std::cout << "Unable to open config file.";
+	//	// Handle error accordingly
+	//}
 
 	//if (!renderer.networkManager.Initialize(isServer, serverIP, serverPort)) {
 	//	std::cout << "NetworkManager initialization failed." << std::endl;
@@ -804,12 +828,14 @@ int WINAPI wWinMain(_In_ const HINSTANCE hInstance, _In_opt_ const HINSTANCE hPr
 	//		std::cout << "Server failed to accept a client connection." << std::endl;
 	//		return 0;
 	//	}
+	//	serverConnected = true;
 	//}
 	//else {
 	//	if (!renderer.networkManager.ConnectToServer()) {
 	//		std::cout << "Client failed to connect to the server." << std::endl;
 	//		return 0;
 	//	}
+	//	clientConnected = true;
 	//	//uncomment on client side 
 	//	//renderer.networkManager.SendHello();
 	//}
@@ -1099,13 +1125,14 @@ void MainRender::CreateVoxels()
 		}
 	}
 	
+	
 
 
 	vector<InstanceData>* const instancesPointer = &instances;
 
 
 
-	GameObject Voxels(XMFLOAT3(-20,-30, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), "Voxels", 0.0f, 0.0f);
+	GameObject Voxels(XMFLOAT3(-20,-30, -10), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), "Voxels", 0.0f, 0.0f);
 	Voxels.AddShape(MeshType::CUBE, XMFLOAT3(-5, -5, 0), XMFLOAT3(0, 0, 0), XMFLOAT3(1.0f, 1.0f, 1.0f), L"InstancedShader.fx", "Voxels", &instances);
 	entities.push_back(Voxels);
 	terrain = &Voxels;
@@ -1187,20 +1214,16 @@ void MainRender::ResetScene()
 
 void MainRender::Update(const float& dt)
 {
+	
 
 	CheckInput(dt);
 	hitCubeIds.clear();
 	
 	POINT cursorPos = GetCursorPosition();
-	/*char buffer[100];
-	sprintf_s(buffer, "Cursor Position: x = %d, y = %d\n", cursorPos.x, cursorPos.y);
-	OutputDebugStringA(buffer);*/
+
 	
 	inputManager.Update();
 
-	// ... in MainRender::Update ...
-
-// Loop through each GameObject (Voxel) in the entities list
 	for (auto& voxel : entities)
 	{
 		// Get the shapes associated with this GameObject
@@ -1319,15 +1342,50 @@ void MainRender::Update(const float& dt)
 		// Left mouse button was released
 		OutputDebugStringA("Left mouse button released.\n");
 
-		/*for (const CubeData& cubeData : hitCubes) {
+		for (const CubeData& cubeData : hitCubes) {
 			std::string message = networkManager.FormatCubeDataMessage(cubeData);
 			networkManager.SendData(message);
-		}*/
+		}
 
+		for (const CubeData& cubeData : hitCubes) {
+			networkManager.SendCubeData(cubeData.id, cubeData.isHit);
+		}
+		hitCubes.clear();
 
 	}
+
+	// Begin new part
+	{
+		std::lock_guard<std::mutex> lock(networkManager.cubeDataMutex);
+
+		for (const CubeData& cubeData : networkManager.receivedCubeData)
+		{
+			for (auto& voxel : entities)
+			{
+				auto& shapes = voxel.GetShapes();
+				for (auto& shape : shapes)
+				{
+					auto& instances = shape.Instances();
+
+					for (size_t i = 0; i < instances.size(); ++i)
+					{
+						auto& instance = shape.GetInstance(i);
+						if (instance.id == cubeData.id)
+						{
+							instance.isHit = cubeData.isHit ? 1 : 0;
+							instance.originalColor = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+							instance.hitColor = DirectX::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		networkManager.receivedCubeData.clear();
+	}
 	//UpdateCubes(networkManager);
-	hitCubes.clear();
+
 	m_imguiManager->BeginFrame();
 	 
 

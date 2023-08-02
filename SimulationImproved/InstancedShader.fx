@@ -115,18 +115,6 @@
 //    return finalColour;
 //}
 
-
-
-
-
-
-
-
-
-
-//--------------------------------------------------------------------------------------
-// Constant Buffer Variables
-//--------------------------------------------------------------------------------------
 cbuffer ConstantBuffer : register(b0)
 {
 	matrix World;
@@ -174,11 +162,11 @@ PS_INPUT VS(VS_INPUT input)
 
 	if (input.isHit == 1)  // Checking if isHit is 1 instead of true
 	{
-		output.colorToApply = float4(1.0f, 1.0f,1.0f, 1.0f); // Use the hit color if the cube has been hit
+		output.colorToApply = float4(1.0f, 1.0f,1.0f, 1.0f); // black coolor for hit
 	}
 	else
 	{
-		output.colorToApply = input.originalColor; // Use the original color if the cube has not been hit
+		output.colorToApply = input.originalColor; // Use the original color if  not  hit
 	}
 	return output;
 }

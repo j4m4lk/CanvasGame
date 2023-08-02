@@ -18,6 +18,8 @@
 #include <Windowsx.h>
 #include "InputManager.h"
 #include "CubeData.h"
+#include <fstream>
+#include <string>
 
 
 extern HINSTANCE g_hInst;
@@ -129,10 +131,12 @@ private:
 
 
 	bool InitNetworkManager();
+	/*ThreadManager renderThreadManager;
+	ThreadManager createVoxelsThreadManager;*/
+
 
 public:
 	int cam = 0;
-
 
 
 	MainRender();

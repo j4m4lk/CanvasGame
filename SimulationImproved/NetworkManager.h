@@ -3,13 +3,14 @@
 #include <ws2tcpip.h>
 #include <string>
 #include <iostream>
-#include <thread>
+//#include <thread>
 #include <atomic>
 #include <sstream> 
 #include <vector> 
 #include <string>   
 #include "CubeData.h"
 #include <mutex>
+#include "ThreadManager.h"
 
 
 
@@ -45,6 +46,9 @@ public:
     std::vector<CubeData> receivedCubeData; // Shared data
     std::mutex cubeDataMutex;               // Mutex to protect shared data
 
+    bool IsServerConnected() const { return serverExists; }
+    bool IsClientConnected() const { return clientConnected; }
+
 private:
     WSADATA wsaData;
     SOCKET ConnectionSocket;
@@ -58,6 +62,8 @@ private:
     std::atomic<bool> shouldStopListening = false; 
     std::string SerializeCubeData(int id, bool isHit);
     std::pair<int, bool> ParseCubeData(const std::string& data);
-
+    ThreadManager listeningThreadManager;
+    bool serverExists = false;  // Indicates whether a server exists
+    bool clientConnected = false;  // 
 
 };

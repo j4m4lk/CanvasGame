@@ -1,4 +1,10 @@
 #include "NetworkManager.h"
+#include "NetworkStats.h"
+
+int totalPlayers = 1;
+bool serverConnected = false;
+bool clientConnected = false;
+
 
 NetworkManager::NetworkManager() : ConnectionSocket(INVALID_SOCKET), ListenSocket(INVALID_SOCKET), initialized(false), isServer(false),running(false) {}
 
@@ -20,6 +26,8 @@ bool NetworkManager::Initialize(bool isServer, std::string ip, int port) {
     }
 
     this->isServer = isServer;
+    
+    this->serverExists = isServer;
 
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
@@ -73,9 +81,15 @@ bool NetworkManager::ConnectToServer() {
         WSACleanup();
         return false;
     }
+  
+       
 
     // We've connected to the server, so start the listening thread
     StartListeningThread();
+
+    this->clientConnected = true;
+    clientConnected = true;
+    totalPlayers++;
 
     return true;
 }
@@ -92,7 +106,8 @@ bool NetworkManager::AcceptConnection() {
         WSACleanup();
         return false;
     }
-
+    serverConnected = true;
+    totalPlayers++;
     // We've accepted a connection, so start the listening thread
     StartListeningThread();
 
@@ -113,6 +128,12 @@ bool NetworkManager::Disconnect() {
 
     closesocket(ConnectionSocket);
     WSACleanup();
+    this->serverExists = this->isServer;
+    this->clientConnected = false;
+    if (isServer) serverConnected = false;
+    else clientConnected = false;
+    totalPlayers--;
+
     return true;
 }
 
@@ -160,6 +181,8 @@ std::string NetworkManager::ListenForMessages() {
             //    receivedCubeData.push_back(cubeData);
             //
             //}
+            //not bieng interpeted 
+
         }
         return receivedData;
     }
@@ -170,20 +193,18 @@ std::string NetworkManager::ListenForMessages() {
 
     return "";
 }
+
 void NetworkManager::StartListeningThread() {
-    running = true;
-    listeningThread = std::thread([this]() {
-        while (running) {
+    listeningThreadManager.StartThread([this]() {
+        while (!listeningThreadManager.ShouldStop()) {
             ListenForMessages();
         }
-        });
+        },1);
+    //for after 1 for netowrk as in the table 
 }
 
 void NetworkManager::StopListeningThread() {
-    running = false;
-    if (listeningThread.joinable()) {
-        listeningThread.join();
-    }
+    listeningThreadManager.StopThread();
 }
 
 // Helper function to serialize the data.
