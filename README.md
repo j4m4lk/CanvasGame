@@ -24,6 +24,7 @@ Players are greeted with a 3D canvas populated by cubes, each colored distinctiv
 Reflection & Way Forward
 In retrospect, the project can be deemed a success. The game exhibits consistent performance, networking, and canvas drawing.
 
-![canvas](https://github.com/j4m4lk/CanvasGame/assets/77670357/4b1598b8-cd13-4385-855e-e1014349d49b)
+![canvas](https://github.com/j4m4lk/CanvasGame/assets/77670357/d02dc1a4-c46e-4334-8098-102bf3e83bea)
+
 
 However, some avenues remain for enhancement, notably in the engine's versatility and latency reduction. An immediate area of improvement is the task parameter limit in threading. Introducing dynamic parameter intake, maybe via a vector of void pointers, could be a solution. On the networking front, refining message packaging and optimizing traffic distribution could further elevate performance.
